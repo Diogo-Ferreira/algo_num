@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Labo 1 - Algo num groupe 1</title>
+  </head>
+  <body>
+    <form id="main-form">
+      <p>
+        <label id="nb_dec_container">
+          Nombres (Décimale)
+          <p><input type="number" name="dec" placeholder="nombre à convertir"></p>
+        </label>
+      <p/>
+      <p>
+        <label>
+          Nombre de bits
+          <p><input type="number" name="n_bits" value="8" required /></p>
+        </label>
+      </p>
+      <p>
+        <label id="nb_bin_container">
+          Nombres (Binaire)
+          <p><input type="text" name="bin" placeholder="nombre à convertir"></p>
+        </label>
+      </p>
+      <button id="add_nb_btn" href="#">Ajouter un nombre</button>
+      <input type="submit" name="sub" value="calculer"/>
+    </form>
+
+    <script>
+      var form = document.getElementById("main-form");
+      form.onsubmit = function(event)
+      {
+        //Evite de recharger la page
+        event.preventDefault();
+        form_values = form.elements;
+      }
+      document.getElementById("add_nb_btn").onclick = function(event){
+        var dec_container = document.getElementById("nb_dec_container");
+        var bin_container = document.getElementById("nb_bin_container");
+        dec_container.innerHTML += '<p><input type="number" name="dec" placeholder="nombre à convertir"></p>';
+        bin_container.innerHTML += '<p><input type="text" name="bin" placeholder="nombre à convertir"></p>';
+      }
+    </script>
+  </body>
+</html>
