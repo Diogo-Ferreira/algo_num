@@ -24,12 +24,61 @@
           <p><input type="text" name="bin" placeholder="nombre à convertir"></p>
         </label>
       </p>
+      <p>
+        <label>
+          Dec --> Bin
+          <input onclick="changeDirection(0);" type="radio" name="convertion-dir" value="0" checked="checked" />
+        </label>
+      </p>
+      <p>
+        <label>
+          Bin --> Dec
+          <input onclick="changeDirection(1);"class="radio-convertio-dir" type="radio" name="convertion-dir" value="1" />
+        </label>
+      </p>
       <button id="add_nb_btn" href="#">Ajouter un nombre</button>
+      <input type="hidden" name="direction" value="0" />
       <input type="submit" name="sub" value="calculer"/>
     </form>
+    <div id="error-zone">
+
+    </div>
 
     <script>
+
+      var converter = {
+        dec2bin : function(dec,n_bits)
+        {
+          if(n_bits >= Math.log2(dec) + 1)
+          {
+            var k,n;
+            var output = "";
+            var dec = parseInt(dec);
+            var n_bits = parseInt(n_bits);
+            for (var c = n_bits-1; c >= 0; c--)
+             {
+               k = dec >> c;
+               if (k & 1)
+                 output += "1";
+               else
+                 output += "0";
+             }
+             return output;
+          }
+          else{
+            return {type:"error",error:"nombre de bits insuffisant"}
+          }
+        },
+        bin2dec : function(bin)
+        {
+          return bin.split('').reverse().reduce(function(x, y, i){
+            return (y === '1') ? x + Math.pow(2, i) : x;
+          }, 0);
+        }
+      };
+
       var form = document.getElementById("main-form");
+      var error_zone = document.getElementById("error-zone");
       form.onsubmit = function(event)
       {
         //Evite de recharger la page
@@ -41,6 +90,21 @@
         var bin_container = document.getElementById("nb_bin_container");
         dec_container.innerHTML += '<p><input type="number" name="dec" placeholder="nombre à convertir"></p>';
         bin_container.innerHTML += '<p><input type="text" name="bin" placeholder="nombre à convertir"></p>';
+      }
+
+      function changeDirection(id)
+      {
+        if( id == 0)
+        {
+          if(form_values.bin.length == undefined)
+          {
+            form_values.bin.disableb = true;
+          }else {
+            form_values.bin.reduce(function(x, y, i){
+              return (y === '1') ? x + Math.pow(2, i) : x;
+            });
+          }
+        }
       }
     </script>
   </body>
