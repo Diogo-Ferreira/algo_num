@@ -9,7 +9,7 @@
       <p>
         <label id="nb_dec_container">
           Nombres (Décimale)
-          <p><input type="number" name="dec" placeholder="nombre à convertir"></p>
+          <p><input min="0" type="number" name="dec" placeholder="nombre à convertir"></p>
         </label>
       <p/>
       <p>
@@ -21,9 +21,15 @@
       <p>
         <label id="nb_bin_container">
           Nombres (Binaire)
-          <p><input type="text" name="bin" placeholder="nombre à convertir" disabled="true"></p>
+          <p><input pattern="[0-1]*" type="text" name="bin" placeholder="nombre à convertir" disabled="true"></p>
         </label>
       </p>
+      <hr/>
+      <div id="results-zone">
+        <p>Addtitions       : <span id ="sum-container"></span></p>
+        <p>Multiplications  : <span id ="mult-container"></span></p>
+      </div>
+      <hr/>
       <p>
         <label>
           Dec --> Bin
@@ -40,14 +46,6 @@
       <input id="direction-field" type="hidden" name="direction" value="0" />
       <input type="submit" name="sub" value="calculer"/>
     </form>
-    <div id="error-zone">
-
-    </div>
-    <div id="results-zone">
-
-    </div>
-
-
     <script>
 
       var converter = {
@@ -67,24 +65,31 @@
                else
                  output += "0";
              }
-             return {type:"success",result:output};
+             return output;
           }
           else{
-            return {type:"error",error:"nombre de bits insuffisants"};
+            alert("nombre de bits unsuffisants");
+            return -1;
           }
         },
         bin2dec : function(bin)
         {
-          return {type:"sucess",result:bin.split('').reverse().reduce(function(x, y, i){
+          return bin.split('').reverse().reduce(function(x, y, i){
             return (y === '1') ? x + Math.pow(2, i) : x;
-          }, 0)};
+          }, 0);
         },
-        add_bin: function (a, b){
-        		var nombre1 = a.split("");
-        		var nombre2 = b.split("");
-        		var resultat = new Array(nombre1.length);
+        add_bin:function (a, b){
+				if(a.length>=b.length){
+					var nombre1 = a.split("").reverse();
+					var nombre2 = b.split("").reverse();
+				}
+				else{
+					var nombre1 = b.split("").reverse();
+					var nombre2 = a.split("").reverse();
+				}
+        		var resultat = new Array();
         		var retenue=0;
-        		for(var j= nombre1.length; j<0; j--){
+        		for(var j = 0; j<nombre2.length; j++){
         			if(nombre1[j]==0 && nombre2[j]==0){
         				if(retenue==0){
         					resultat[j]="0";
@@ -113,8 +118,71 @@
         				}
         			}
         		}
-        		return resultat.join("");
-        	  }
+				for(var i = nombre2.length; i<nombre1.length;i++){
+					if(retenue == 1){
+						if(nombre1[i]==0){
+							resultat[i]="1";
+							retenue=0;
+						}
+						else{
+							resultat[i]="0"
+						}
+					}
+					else{
+						resultat[i]=nombre1[i];
+					}
+
+				}
+				if(retenue==1){
+					resultat.push("1");
+				}
+        		return resultat.reverse().join("");
+				//return nombre1;
+        },
+		sub_bin: function (a, b){
+				var add1 = "01";
+				if(a.length>=b.length){
+					var nombre1 = a.split("");
+					var nombre2 = b.split("");
+				}
+				else{
+					var nombre1 = b.split("");
+					var nombre2 = a.split("");
+				}
+				for(var k = 0; k < nombre2.length; k++){
+					if(nombre2[k]==1){
+						nombre2[k]="0";
+					}
+					else{
+						nombre2[k]="1";
+					}
+				}
+				var resultat = converter.add_bin(nombre1.join(""), nombre2.join(""));
+        		var deduit = resultat.split("");
+				delete deduit[0];
+				var resultatFinal = converter.add_bin(deduit.join(""), add1);
+				return resultatFinal;
+		},
+    mul_bin: function(a, b) {
+    			var result ="0", index=0, tmp="", shift="";
+    			var sum=[];
+
+    			for(var i = a.length-1 ; i>=0; i--) {
+    				for(var j = 0 ; j<b.length;j++) {
+    					tmp+=a[i]*b[j];
+    				}
+    				tmp+=shift;
+    				sum[index++]=tmp;
+    				shift+="0";
+    				tmp="";
+    			}
+    			--index;
+    			var tmpResult="";
+    			while(index>=0) {
+    				result=converter.add_bin(sum[index--], result);
+    			}
+    			return result;
+    		}
       };
 
       var form = document.getElementById("main-form");
@@ -127,31 +195,46 @@
         var form_values = form.elements;
         var direction = document.getElementById("direction-field").value;
         var n_bits = document.getElementById("n_bits_input").value;
+        var dec_values = toArrayIfNotNodeList(form_values.dec);
+        var bin_values = toArrayIfNotNodeList(form_values.bin);
+        var values_to_calulate = [];
+
+        //============Conversions======================
         if(direction == 0)
         {
-          if(form_values.dec.length === undefined)
+          for(var i =0;i<form_values.bin.length; i++)
           {
-            applyResult(converter.dec2bin(form_values.dec.value,n_bits),form_values.bin);
-          }else{
-            for(var i =0;i<form_values.bin.length; i++)
-            {
-              applyResult(converter.dec2bin(form_values.dec[i].value,n_bits),form_values.bin[i]);
-            }
+            var bin_tmp = converter.dec2bin(dec_values[i].value,n_bits);
+            values_to_calulate.push({value:bin_tmp});
+            bin_values[i].value = bin_tmp;
           }
         }else {
-          if(form_values.bin.length === undefined)
+          for(var i =0;i<form_values.dec.length; i++)
           {
-            applyResult(converter.bin2dec(form_values.bin.value),form_values.dec);
-          }else{
-            for(var i =0;i<form_values.dec.length; i++)
-            {
-              applyResult(converter.bin2dec(form_values.bin[i].value),form_values.dec[i]);
-            }
+            dec_values[i].value = converter.bin2dec(bin_values[i].value);
           }
+          values_to_calulate = form_values.bin;
+          //Comme NodeList ne possède pas la methode forEach, on l'ajoute à son prototype
+          NodeList.prototype.forEach = Array.prototype.forEach;
         }
+        //=============Calculs=========================
+        var sum = "0";
+        var mult = "1";//Ne pas mettre à 0 !
+        var neg_sum = "0";
+        values_to_calulate.forEach(function(item){
+          //Quick fix, la multiplication bug lorsqu'on mets de 0 inutiles
+          var item_val = item.value.replace(/^0+(?!$)/,"");
+          sum = converter.add_bin(sum,item_val);
+          mult = converter.mul_bin(mult,item_val);
+          neg_sum = converter.sub_bin(neg_sum,item_val);
+        });
+        console.log("sum = " + sum  + " dec : " + converter.bin2dec(sum));
+        console.log("negative sum = " + neg_sum  + " dec : " + converter.bin2dec(neg_sum));
+        console.log("multiplications = " + mult + " dec : " + converter.bin2dec(mult));
+        //Mise à jour dans le document
+        document.getElementById("sum-container").innerHTML = sum;
+        document.getElementById("mult-container").innerHTML = mult;
       }
-
-
       document.getElementById("add_nb_btn").onclick = function(event){
         var dec_container = document.getElementById("nb_dec_container");
         var bin_container = document.getElementById("nb_bin_container");
@@ -159,14 +242,19 @@
         bin_container.innerHTML += '<p><input type="text" name="bin" placeholder="nombre à convertir"></p>';
         changeDirection(document.getElementById("direction-field").value);
       }
-      function applyResult(res,elem)
+      /**
+      * Cette fonction permettra de traiter un seul input, comme une liste de node (nodelist),
+      * ceci pour appliquer le même traitement que le cas ou on as plusieurs champs dec
+      */
+      function toArrayIfNotNodeList(node)
       {
-        if(res.type == "error")
+        if(node.toString() === "[object HTMLInputElement]")
         {
-          alert(res.error);
-          return -1;
-        }else {
-          elem.value = res.result;
+          var arr = []
+          arr.push(node);
+          return arr;
+        }else{
+          return node;
         }
       }
       function changeDirection(id)
@@ -176,24 +264,19 @@
         var nodes_to_enable = undefined;
         if( id == 0)
         {
-          nodes_to_disable = form_values.bin;
-          nodes_to_enable = form_values.dec;
+          nodes_to_disable = toArrayIfNotNodeList(form_values.bin);
+          nodes_to_enable = toArrayIfNotNodeList(form_values.dec);
         }
         else if(id == 1)
         {
-          nodes_to_disable = form_values.dec;
-          nodes_to_enable = form_values.bin;
+          nodes_to_disable = toArrayIfNotNodeList(form_values.dec);
+          nodes_to_enable = toArrayIfNotNodeList(form_values.bin);
         }
-        if(nodes_to_disable.length == undefined)
+
+        for(var i=0; i < nodes_to_disable.length;i++)
         {
-          nodes_to_disable.disabled = true;
-          nodes_to_enable.disabled = false;;
-        }else {
-          for(var i=0; i < nodes_to_disable.length;i++)
-          {
-            nodes_to_disable[i].disabled = true;
-            nodes_to_enable[i].disabled = false;
-          }
+          nodes_to_disable[i].disabled = true;
+          nodes_to_enable[i].disabled = false;
         }
         document.getElementById("direction-field").value = id;
       }
