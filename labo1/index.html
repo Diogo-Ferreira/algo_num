@@ -15,13 +15,13 @@
       <p>
         <label>
           Nombre de bits
-          <p><input type="number" name="n_bits" value="8" required /></p>
+          <p><input id="n_bits_input" type="number" name="n_bits" value="8" required /></p>
         </label>
       </p>
       <p>
         <label id="nb_bin_container">
           Nombres (Binaire)
-          <p><input type="text" name="bin" placeholder="nombre à convertir"></p>
+          <p><input type="text" name="bin" placeholder="nombre à convertir" disabled="true"></p>
         </label>
       </p>
       <p>
@@ -36,13 +36,17 @@
           <input onclick="changeDirection(1);"class="radio-convertio-dir" type="radio" name="convertion-dir" value="1" />
         </label>
       </p>
-      <button id="add_nb_btn" href="#">Ajouter un nombre</button>
-      <input type="hidden" name="direction" value="0" />
+      <button id="add_nb_btn" type="button">Ajouter un nombre</button>
+      <input id="direction-field" type="hidden" name="direction" value="0" />
       <input type="submit" name="sub" value="calculer"/>
     </form>
     <div id="error-zone">
 
     </div>
+    <div id="results-zone">
+
+    </div>
+
 
     <script>
 
@@ -63,48 +67,135 @@
                else
                  output += "0";
              }
-             return output;
+             return {type:"success",result:output};
           }
           else{
-            return {type:"error",error:"nombre de bits insuffisant"}
+            return {type:"error",error:"nombre de bits insuffisants"};
           }
         },
         bin2dec : function(bin)
         {
-          return bin.split('').reverse().reduce(function(x, y, i){
+          return {type:"sucess",result:bin.split('').reverse().reduce(function(x, y, i){
             return (y === '1') ? x + Math.pow(2, i) : x;
-          }, 0);
-        }
+          }, 0)};
+        },
+        add_bin: function (a, b){
+        		var nombre1 = a.split("");
+        		var nombre2 = b.split("");
+        		var resultat = new Array(nombre1.length);
+        		var retenue=0;
+        		for(var j= nombre1.length; j<0; j--){
+        			if(nombre1[j]==0 && nombre2[j]==0){
+        				if(retenue==0){
+        					resultat[j]="0";
+        				}
+        				else{
+        					resultat[j]="1";
+        					retenue=0;
+        				}
+        			}
+        			else if(nombre1[j]==1 && nombre2[j]==1){
+        				if(retenue==0){
+        					resultat[j]="0";
+        					retenue=1;
+        				}
+        				else{
+        					resultat[j]="1";
+        				}
+        			}
+        			else{
+        				if(retenue==0){
+        					resultat[j]="1";
+        				}
+        				else{
+        					resultat[j]="0";
+        					retenue=0;
+        				}
+        			}
+        		}
+        		return resultat.join("");
+        	  }
       };
 
       var form = document.getElementById("main-form");
       var error_zone = document.getElementById("error-zone");
+
       form.onsubmit = function(event)
       {
         //Evite de recharger la page
         event.preventDefault();
-        form_values = form.elements;
+        var form_values = form.elements;
+        var direction = document.getElementById("direction-field").value;
+        var n_bits = document.getElementById("n_bits_input").value;
+        if(direction == 0)
+        {
+          if(form_values.dec.length === undefined)
+          {
+            applyResult(converter.dec2bin(form_values.dec.value,n_bits),form_values.bin);
+          }else{
+            for(var i =0;i<form_values.bin.length; i++)
+            {
+              applyResult(converter.dec2bin(form_values.dec[i].value,n_bits),form_values.bin[i]);
+            }
+          }
+        }else {
+          if(form_values.bin.length === undefined)
+          {
+            applyResult(converter.bin2dec(form_values.bin.value),form_values.dec);
+          }else{
+            for(var i =0;i<form_values.dec.length; i++)
+            {
+              applyResult(converter.bin2dec(form_values.bin[i].value),form_values.dec[i]);
+            }
+          }
+        }
       }
+
+
       document.getElementById("add_nb_btn").onclick = function(event){
         var dec_container = document.getElementById("nb_dec_container");
         var bin_container = document.getElementById("nb_bin_container");
         dec_container.innerHTML += '<p><input type="number" name="dec" placeholder="nombre à convertir"></p>';
         bin_container.innerHTML += '<p><input type="text" name="bin" placeholder="nombre à convertir"></p>';
+        changeDirection(document.getElementById("direction-field").value);
       }
-
+      function applyResult(res,elem)
+      {
+        if(res.type == "error")
+        {
+          alert(res.error);
+          return -1;
+        }else {
+          elem.value = res.result;
+        }
+      }
       function changeDirection(id)
       {
+        var form_values = form.elements;
+        var nodes_to_disable = undefined;
+        var nodes_to_enable = undefined;
         if( id == 0)
         {
-          if(form_values.bin.length == undefined)
+          nodes_to_disable = form_values.bin;
+          nodes_to_enable = form_values.dec;
+        }
+        else if(id == 1)
+        {
+          nodes_to_disable = form_values.dec;
+          nodes_to_enable = form_values.bin;
+        }
+        if(nodes_to_disable.length == undefined)
+        {
+          nodes_to_disable.disabled = true;
+          nodes_to_enable.disabled = false;;
+        }else {
+          for(var i=0; i < nodes_to_disable.length;i++)
           {
-            form_values.bin.disableb = true;
-          }else {
-            form_values.bin.reduce(function(x, y, i){
-              return (y === '1') ? x + Math.pow(2, i) : x;
-            });
+            nodes_to_disable[i].disabled = true;
+            nodes_to_enable[i].disabled = false;
           }
         }
+        document.getElementById("direction-field").value = id;
       }
     </script>
   </body>
