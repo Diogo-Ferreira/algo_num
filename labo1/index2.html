@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Labo 1 - Groupe 1</title>
+</head>
+
+<body>
+  <h1>Convertions </h1>
+  <form id="convert-form">
+    <p>
+
+      <h3>1. Sens conversion </h3>
+
+      <p>
+        <input type="radio" onclick='disable_by_id("bin_in");enable_by_id("dec_in","n_bits_in");' name="direction" value="0" checked="checked" /> Dec --> Bin
+      </p>
+      <p>
+        <input type="radio" onclick='disable_by_id("dec_in","n_bits_in");enable_by_id("bin_in");' name="direction" value="1" /> Bin --> Dec
+      </p>
+
+    </p>
+    <p>
+      <label>
+        Nombre de bits
+        <input id="n_bits_in" type="number" min="0" name="n_bits" value="8" required="true"/>
+      </label>
+    </p>
+    <p>
+      <h3> 2. Données et résultats </h3>
+      <label>
+        Nombre en décimal
+        <input id="dec_in" type="number" name="dec" required="true" />
+      </label>
+    </p>
+    <p>
+      <label>
+        Nombre en binaire
+        <input id="bin_in" type="text" pattern="[0-1]*" name="bin" disabled="true" required="true" />
+      </label>
+    </p>
+    <p>
+      <input type="submit" name="sub" value="Convertir" />
+    </p>
+  </form>
+
+  <hr/>
+
+  <h1>Calculs binaire</h1>
+
+  <form id="operation-form">
+    <h3>1. Arguments</h3>
+    <p>
+      <label>
+        Nombre 1
+        <input type="text" pattern="[0-1]*" name="bin_nb_1" required="true"/>
+      </label>
+    </p>
+    <p>
+      <label>
+        Nombre 2
+        <input type="text" pattern="[0-1]*" name="bin_nb_2" required="true"/>
+      </label>
+    </p>
+
+    <h3>2. Opération</h3>
+    <input type="submit" name="add" value="Addition" />
+    <input type="submit" name="sub" value="Soustraction" />
+    <input type="submit" name="mult" value="Multiplication" />
+    <input type="submit" name="div" value="Division" />
+
+    <h3>3. Résultats</h3>
+    <div id="operations-results"></div>
+  </form>
+  <script>
+    var converter = {
+      dec2bin: function(dec, n_bits) {
+        if (n_bits >= Math.log2(dec) + 1) {
+          var k, n;
+          var output = "";
+          var dec = parseInt(dec);
+          var n_bits = parseInt(n_bits);
+          for (var c = n_bits - 1; c >= 0; c--) {
+            k = dec >> c;
+            if (k & 1)
+              output += "1";
+            else
+              output += "0";
+          }
+          return output;
+        } else {
+          alert("nombre de bits unsuffisants");
+          return -1;
+        }
+      },
+      bin2dec: function(bin) {
+        return bin.split('').reverse().reduce(function(x, y, i) {
+          return (y === '1') ? x + Math.pow(2, i) : x;
+        }, 0);
+      },
+      add_bin: function(a, b) {
+
+        var remainder = "0",
+          result = "";
+
+        if (a.length < b.length) {
+          var diff = b.length - a.length;
+          while (diff > 0) {
+            a = "0" + a;
+            --diff;
+          }
+        } else if (a.length > b.length) {
+          var diff = a.length - b.length;
+          while (diff > 0) {
+            b = "0" + b;
+            --diff;
+          }
+        }
+
+        for (var i = a.length - 1; i >= 0; i--) {
+          if (a[i] == "1" && b[i] == "1") {
+            if (remainder == "1") {
+              result += "1";
+            } else if (remainder == "0") {
+              result += "0";
+            }
+            remainder = "1";
+          } else if ((a[i] == "1" && b[i] == "0") || (a[i] == "0" && b[i] == "1")) {
+            if (remainder == "1") {
+              result += "0";
+              remainder = "1";
+            } else if (remainder == "0") {
+              result += "1";
+              remainder = "0";
+            }
+          } else if (a[i] == "0" && b[i] == "0") {
+            if (remainder == "1") {
+              result += "1";
+              remainder = "0";
+            } else if (remainder == "0") {
+              result += "0";
+            }
+          }
+        }
+        if (remainder == "1")
+          result += "1";
+        result = result.split("").reverse().join("");
+        return result;
+      },
+      /*Pas 100% fonctionnel*/
+      sub_bin: function(a, b) {
+        var add1 = "01";
+        if (a.length >= b.length) {
+          var nombre1 = a.split("");
+          var nombre2 = b.split("");
+        } else {
+          var nombre1 = b.split("");
+          var nombre2 = a.split("");
+        }
+        for (var k = 0; k < nombre2.length; k++) {
+          if (nombre2[k] == 1) {
+            nombre2[k] = "0";
+          } else {
+            nombre2[k] = "1";
+          }
+        }
+        var resultat = converter.add_bin(nombre1.join(""), nombre2.join(""));
+        var deduit = resultat.split("");
+        delete deduit[0];
+        var resultatFinal = converter.add_bin(deduit.join(""), add1);
+        return resultatFinal;
+      },
+      mul_bin: function(a, b) {
+        var result = "0",
+          index = 0,
+          tmp = "",
+          shift = "";
+        var sum = [];
+
+        for (var i = a.length - 1; i >= 0; --i) {
+          for (var j = b.length - 1; j >= 0; --j) {
+            tmp += a[i] * b[j];
+          }
+          tmp = tmp.split("").reverse().join("");
+          tmp += shift;
+          sum[index++] = tmp;
+          shift += "0";
+          tmp = "";
+        }
+        --index;
+
+        while (index >= 0) {
+          result = converter.add_bin(sum[index--], result);
+        }
+        return result;
+      }
+    };
+
+    var convert_form = document.getElementById("convert-form");
+    var operation_form = document.getElementById("operation-form");
+
+    convert_form.onsubmit = function(event){
+      event.preventDefault();
+
+      if(convert_form.elements.direction.value === "0")
+      {
+        convert_form.elements.bin.value = converter.dec2bin(convert_form.elements.dec.value,convert_form.elements.n_bits.value);
+      }else if(convert_form.elements.direction.value === "1")
+      {
+        convert_form.elements.dec.value = converter.bin2dec(convert_form.elements.bin.value);
+      }
+    }
+
+    operation_form.onsubmit = function(event){
+      event.preventDefault();
+    }
+
+    function disable_by_id()
+    {
+      for (var i = 0; i < arguments.length; i++) {
+        document.getElementById(arguments[i]).disabled = true;
+      }
+    }
+
+    function enable_by_id()
+    {
+      for (var i = 0; i < arguments.length; i++) {
+        document.getElementById(arguments[i]).disabled = false;
+      }
+    }
+  </script>
+</body>
+
+</html>
