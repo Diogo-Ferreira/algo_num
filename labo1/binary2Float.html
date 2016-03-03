@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Labo 2 - Equipe 1</title>
+  </head>
+  <body>
+    <form id="main-form">
+      <label id="nb_dec">
+        Nombre binaire (32bits) :
+        <input type="text" name="nb_dec" placeholder="Nombre à convertir" />
+      </label>
+      <input type="submit" name="calculate" value="Calculer"/>
+    </form>
+    <div id="result">
+      <div id="signe">
+        <table id="tableSigne">
+          <tr>
+            <td align="center">Signe</td>
+            <td align="center">Exposant</td>
+            <td align="center">Mantisse</td>
+            <td align="center">Valeur</td>
+          </tr>
+        </table>
+      </div>
+      <div id="exponent">
+      </div>
+      <div id="mantisse">
+      </div>
+    </div>
+    <script>
+
+      function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+      }
+
+      var form = document.getElementById("main-form");
+
+      form.onsubmit = function(event) {
+        event.preventDefault();
+
+        var elem_signe = document.getElementById("signe");
+        var tableSigne = document.getElementById("tableSigne");
+
+        var form_values = form.elements;
+        var value = form_values.namedItem("nb_dec").value;
+
+        if(!isNumber(value) && value.length == 32) {
+          alert("Nombre incorrect!");
+          return;
+        }
+
+        var d = 127;
+        var bitsSigne=1;
+        var bitsExponent=8;
+        var bitsMantisse=23
+        var result = 0;
+
+        var signe = value.substring(0, bitsSigne);
+        var exponent = value.substring(bitsSigne, bitsSigne+bitsExponent);
+        var mantisse = value.substring(bitsSigne+bitsExponent, bitsExponent+bitsMantisse);
+
+        var newRow = tableSigne.insertRow(-1);
+        var column = newRow.insertCell(0);
+        column.innerHTML = signe;
+
+        column = newRow.insertCell(1);
+        column.innerHTML = exponent;
+
+        column = newRow.insertCell(2);
+        column.innerHTML = mantisse;
+
+        var j = 0;
+        var floatMantisse = 0;
+        for(var i = bitsMantisse-1 ; i>=0 ; --i) {
+          var bit = parseInt(mantisse[i]);
+          if(bit==1) {
+            floatMantisse+=Math.pow(2, j);
+          }
+          j++;
+        }
+        floatMantisse+=Math.pow(2, 23);
+        floatMantisse/=Math.pow(2, 23);
+
+        var power = 0;
+        j = 0;
+        for(var i = bitsExponent-1 ; i>=0 ; --i) {
+          var bit = parseInt(exponent[i]);
+          if(bit==1) {
+            power+=Math.pow(2, j);
+          }
+          j++;
+        }
+
+        var exponentInt=Math.pow(2, power-d);
+
+        result = floatMantisse*exponentInt;
+        var bit = parseInt(signe);
+        if(bit == 1) {
+          result = -result;
+        }
+
+        column = newRow.insertCell(3);
+        column.innerHTML = result;
+      }
+    </script>
+  </body>
+</html>
