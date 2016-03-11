@@ -58,7 +58,7 @@
 
         var signe = value.substring(0, bitsSigne);
         var exponent = value.substring(bitsSigne, bitsSigne+bitsExponent);
-        var mantisse = value.substring(bitsSigne+bitsExponent, bitsExponent+bitsMantisse);
+        var mantisse = value.substring(bitsSigne+bitsExponent, bitsExponent+bitsMantisse+1);
 
         var newRow = tableSigne.insertRow(-1);
         var column = newRow.insertCell(0);
