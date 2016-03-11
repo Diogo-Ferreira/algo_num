@@ -105,7 +105,7 @@
         //Decalage à droite
         if(valueInt == 0) {
           var decalOk = false;
-          while(mantisse.length != 23) {
+          while(mantisse.length != nbBitMantisse) {
             fraction_tmp*=2;
             if(fraction_tmp >= 1) {
               if(!decalOk) {
