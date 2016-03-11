@@ -95,20 +95,23 @@
   <script>
     var converter = {
       dec2bin: function(dec, n_bits) {
-        if (n_bits >= Math.log2(dec) + 1) {
-          var k, n;
+        if(n_bits >= Math.log2(dec))
+        {
+          var k,n;
           var output = "";
           var dec = parseInt(dec);
           var n_bits = parseInt(n_bits);
-          for (var c = n_bits - 1; c >= 0; c--) {
-            k = dec >> c;
-            if (k & 1)
-              output += "1";
-            else
-              output += "0";
-          }
-          return output;
-        } else {
+          for (var c = n_bits-1; c >= 0; c--) {
+             k = dec >> c;
+             if (k & 1) {
+               output += "1";
+             } else {
+               output += "0";
+             }
+           }
+           return output;
+        }
+        else{
           alert("nombre de bits unsuffisants");
           return -1;
         }
@@ -226,6 +229,14 @@
           return;
         }
 
+
+        /*
+
+
+        ICI calculer le nombre de bits de l'exposant, et de la mantisse avec n_bits
+
+        */
+
         var signe = -1;
         if (value >= 0) {
           signe = 0;
@@ -243,7 +254,7 @@
         var valueInt = Math.abs(parseInt(value));
         var valueIntBin = "0";
         if (valueInt != 0) {
-          valueIntBin = converter.dec2bin(valueInt, n_bits);
+          valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt))+1);
         }
         var fraction = Math.abs(Math.abs(value) - valueInt);
         var d = 127;
