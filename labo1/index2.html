@@ -14,10 +14,10 @@
       <h3>1. Sens conversion </h3>
 
       <p>
-        <input type="radio" onclick='disable_by_id("bin_in");enable_by_id("dec_in","n_bits_in");' name="direction" value="0" checked="checked" /> Dec --> Bin
+        <input type="radio" onclick='set_enabled_by_id("bin_in",true);set_enabled_by_id("dec_in","n_bits_in",false);' name="direction" value="0" checked="checked" /> Dec --> Bin
       </p>
       <p>
-        <input type="radio" onclick='disable_by_id("dec_in","n_bits_in");enable_by_id("bin_in");' name="direction" value="1" /> Bin --> Dec
+        <input type="radio" onclick='set_enabled_by_id("dec_in","n_bits_in",true);set_enabled_by_id("bin_in",false);' name="direction" value="1" /> Bin --> Dec
       </p>
 
     </p>
@@ -95,23 +95,21 @@
   <script>
     var converter = {
       dec2bin: function(dec, n_bits) {
-        if(n_bits >= Math.log2(dec))
-        {
-          var k,n;
+        if (n_bits >= Math.log2(dec)) {
+          var k, n;
           var output = "";
           var dec = parseInt(dec);
           var n_bits = parseInt(n_bits);
-          for (var c = n_bits-1; c >= 0; c--) {
-             k = dec >> c;
-             if (k & 1) {
-               output += "1";
-             } else {
-               output += "0";
-             }
-           }
-           return output;
-        }
-        else{
+          for (var c = n_bits - 1; c >= 0; c--) {
+            k = dec >> c;
+            if (k & 1) {
+              output += "1";
+            } else {
+              output += "0";
+            }
+          }
+          return output;
+        } else {
           alert("nombre de bits unsuffisants");
           return -1;
         }
@@ -170,60 +168,10 @@
         result = result.split("").reverse().join("");
         return result;
       },
-      /*Pas 100% fonctionnel*/
-      sub_bin: function(a, b) {
-        var add1 = "01";
-        if (a.length >= b.length) {
-          var nombre1 = a.split("");
-          var nombre2 = b.split("");
-        } else {
-          var nombre1 = b.split("");
-          var nombre2 = a.split("");
-        }
-        for (var k = 0; k < nombre2.length; k++) {
-          if (nombre2[k] == 1) {
-            nombre2[k] = "0";
-          } else {
-            nombre2[k] = "1";
-          }
-        }
-        var resultat = converter.add_bin(nombre1.join(""), nombre2.join(""));
-        var deduit = resultat.split("");
-        delete deduit[0];
-        var resultatFinal = converter.add_bin(deduit.join(""), add1);
-        return resultatFinal;
-      },
-      mul_bin: function(a, b) {
-        var result = "0",
-          index = 0,
-          tmp = "",
-          shift = "";
-        var sum = [];
-
-        for (var i = a.length - 1; i >= 0; --i) {
-          for (var j = b.length - 1; j >= 0; --j) {
-            tmp += a[i] * b[j];
-          }
-          tmp = tmp.split("").reverse().join("");
-          tmp += shift;
-          sum[index++] = tmp;
-          shift += "0";
-          tmp = "";
-        }
-        --index;
-
-        while (index >= 0) {
-          result = converter.add_bin(sum[index--], result);
-        }
-        return result;
-      },
       isNumber: function(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
       },
-      float2Binary: function(value,n_bits) {
-        var elem_signe = document.getElementById("signe");
-        var tableSigne = document.getElementById("tableSigne");
-
+      float2Binary: function(value, n_bits) {
         if (!this.isNumber(value)) {
           alert("Nombre incorrect!");
           return;
@@ -243,28 +191,20 @@
         } else {
           signe = 1;
         }
-
-        var newRow = tableSigne.insertRow(-1);
-        var column = newRow.insertCell(0);
-        column.innerHTML = value;
-
-        var column = newRow.insertCell(1);
-        column.innerHTML = signe;
-
         var valueInt = Math.abs(parseInt(value));
         var valueIntBin = "0";
         if (valueInt != 0) {
-          valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt))+1);
+          valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt)) + 1);
         }
         var fraction = Math.abs(Math.abs(value) - valueInt);
         var d = 127;
         var nbBitMantisse = 23;
         var nbBitsExp = 8;
-
         var fraction_tmp = fraction;
         var fractionBinary = "";
         var mantisse = "";
         var power = 0;
+
         //Decalage à droite
         if (valueInt == 0) {
           var decalOk = false;
@@ -305,16 +245,14 @@
 
         var exposant_dec = d + power;
         var exposant_bin = converter.dec2bin(exposant_dec, nbBitsExp);
-
-        column = newRow.insertCell(2);
-        column.innerHTML = exposant_bin;
-        column = newRow.insertCell(3);
-        column.innerHTML = mantisse;
+        return {
+          value: value,
+          mantisse: mantisse,
+          exposant: exposant_bin,
+          signe: signe
+        };
       },
       binary2Float: function(value) {
-
-        var elem_signe = document.getElementById("signe");
-        var tableSigne = document.getElementById("tableSigne");
 
         if (!this.isNumber(value) && value.length == 32) {
           alert("Nombre incorrect!");
@@ -326,21 +264,9 @@
         var bitsExponent = 8;
         var bitsMantisse = 23
         var result = 0;
-
         var signe = value.substring(0, bitsSigne);
         var exponent = value.substring(bitsSigne, bitsSigne + bitsExponent);
-        var mantisse = value.substring(bitsSigne + bitsExponent, bitsExponent + bitsMantisse+1);
-
-        var newRow = tableSigne.insertRow(-1);
-        var column = newRow.insertCell(0);
-        column.innerHTML = signe;
-
-        column = newRow.insertCell(1);
-        column.innerHTML = exponent;
-
-        column = newRow.insertCell(2);
-        column.innerHTML = mantisse;
-
+        var mantisse = value.substring(bitsSigne + bitsExponent, bitsExponent + bitsMantisse + 1);
         var j = 0;
         var floatMantisse = 0;
         for (var i = bitsMantisse - 1; i >= 0; --i) {
@@ -370,8 +296,12 @@
         if (bit == 1) {
           result = -result;
         }
-        column = newRow.insertCell(3);
-        column.innerHTML = result;
+        return {
+          value: result,
+          mantisse: floatMantisse,
+          exposant: exponentInt,
+          signe: signe
+        };
       }
     };
 
@@ -380,11 +310,12 @@
 
     convert_form.onsubmit = function(event) {
       event.preventDefault();
-
+      
       if (convert_form.elements.direction.value === "0") {
-        convert_form.elements.bin.value = converter.float2Binary(convert_form.elements.dec.value,convert_form.elements.n_bits.value);
+        show_html_table_float_to_binary(converter.float2Binary(convert_form.elements.dec.value, convert_form.elements.n_bits.value));
       } else if (convert_form.elements.direction.value === "1") {
-        convert_form.elements.dec.value = converter.binary2Float(convert_form.elements.bin.value);
+        show_html_table_binary_to_float(converter.binary2Float(convert_form.elements.bin.value));
+        console.log(converter.binary2Float(convert_form.elements.bin.value));
       }
     }
 
@@ -392,16 +323,38 @@
       event.preventDefault();
     }
 
-    function disable_by_id() {
-      for (var i = 0; i < arguments.length; i++) {
-        document.getElementById(arguments[i]).disabled = true;
+    function set_enabled_by_id() {
+      for (var i = 0; i < arguments.length-1; i++) {
+        document.getElementById(arguments[i]).disabled = arguments[arguments.length-1];
       }
     }
 
-    function enable_by_id() {
-      for (var i = 0; i < arguments.length; i++) {
-        document.getElementById(arguments[i]).disabled = false;
-      }
+    function show_html_table_binary_to_float(data) {
+      var elem_signe = document.getElementById("signe");
+      var tableSigne = document.getElementById("tableSigne");
+      var newRow = tableSigne.insertRow(-1);
+      var column = newRow.insertCell(0);
+      column.innerHTML = data.signe;
+      column = newRow.insertCell(1);
+      column.innerHTML = data.exposant;
+      column = newRow.insertCell(2);
+      column.innerHTML = data.mantisse;
+      column = newRow.insertCell(3);
+      column.innerHTML = data.value;
+    }
+
+    function show_html_table_float_to_binary(data) {
+      var elem_signe = document.getElementById("signe");
+      var tableSigne = document.getElementById("tableSigne");
+      var newRow = tableSigne.insertRow(-1);
+      var column = newRow.insertCell(0);
+      column.innerHTML = data.value;
+      var column = newRow.insertCell(1);
+      column.innerHTML = data.signe;
+      column = newRow.insertCell(2);
+      column.innerHTML = data.exposant;
+      column = newRow.insertCell(3);
+      column.innerHTML = data.mantisse;
     }
   </script>
 </body>
