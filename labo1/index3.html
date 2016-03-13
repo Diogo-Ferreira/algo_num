@@ -16,7 +16,7 @@
         <p>
           <label>
             Nombre de bits :
-            <input id="n_bits" type="number" min="8" max="256" value="16" name="n_bits"  required="true" /> [8;256]
+            <input id="n_bits" type="number" min="8" max="256" value="16" name="n_bits" required="true" /> [8;256]
           </label>
         </p>
       </td>
@@ -27,14 +27,25 @@
       </td>
     </tr>
     <tr>
-      <td><p>Nombre flottant : <input id="number_dec" type="number" step="0.1" required="true" onkeyup="number_dec_onKeyUp(event);" /></p></td>
+      <td>
+        <p>Nombre flottant :
+          <input id="number_dec" type="number" step="0.1" required="true" onkeyup="number_dec_onKeyUp(event);" />
+        </p>
+      </td>
     </tr>
     <tr>
-      <td><p>Nombre binaire : <input id="number_bin" type="text" required="true" onkeyup="number_bin_onKeyUp(event);" /></p></td>
-      <td><div id="div_length">0</div></td>
+      <td>
+        <p>Nombre binaire :
+          <input id="number_bin" type="text" required="true" onkeyup="number_bin_onKeyUp(event);" />
+        </p>
+      </td>
+      <td>
+        <div id="div_length">0</div>
+      </td>
     </tr>
   </table>
-  <p><h3>Résultat</h3></p>
+  <p>
+    <h3>Résultat</h3></p>
   <table id="table_results" border="1">
     <th align="center">Nombre de bits</th>
     <th align="center">Valeur</th>
@@ -42,7 +53,8 @@
     <th align="center">Exposant</th>
     <th align="center">Mantisse</th>
   </table>
-  <br/><br/>
+  <br/>
+  <br/>
   <hr/>
 
   <h1>Calculs binaire</h1>
@@ -69,82 +81,120 @@
     <div id="operations-results"></div>
   </form>
   <script>
-  /*
-  Pour essayer l'addition floatante taper dans la console chrome ou firefox :
-  3.5 + 3.5 = 7
-  var floatOne = {value:"1000000011000000000000000000000" ,sign:"0",exp:"10000000",mantiss:"11000000000000000000000"}
-  var floatTwo = {value:"1000000011000000000000000000000" ,sign:"0",exp:"10000000",mantiss:"11000000000000000000000"}
-  converter.add_floating_bin(floatOne,floatTwo)
-  ce qui devrait donner normalment (7.0) : 01000000 11100000 00000000 00000000
-  ==============================================================================
-  Les méthodes précéder de __ sont des méthodes privés !
-  */
+    /*
+      Pour essayer l'addition floatante taper dans la console chrome ou firefox :
+      3.5 + 3.5 = 7
+      var floatOne = {value:"1000000011000000000000000000000" ,sign:"0",exp:"10000000",mantiss:"11000000000000000000000"}
+      var floatTwo = {value:"1000000011000000000000000000000" ,sign:"0",exp:"10000000",mantiss:"11000000000000000000000"}
+      converter.add_floating_bin(floatOne,floatTwo)
+      ce qui devrait donner normalment (7.0) : 01000000 11100000 00000000 00000000
+      ==============================================================================
+      Les méthodes précéder de __ sont des méthodes privés !
+      */
     var converter = {
       dec2bin: function(dec, n_bits) {
-        if(n_bits >= Math.log2(dec))
-        {
-          var k,n;
+        if (n_bits >= Math.log2(dec)) {
+          var k, n;
           var output = "";
           var dec = parseInt(dec);
           var n_bits = parseInt(n_bits);
-          for (var c = n_bits-1; c >= 0; c--) {
-             k = dec >> c;
-             if (k & 1) {
-               output += "1";
-             } else {
-               output += "0";
-             }
-           }
-           return output;
-        }
-        else{
+          for (var c = n_bits - 1; c >= 0; c--) {
+            k = dec >> c;
+            if (k & 1) {
+              output += "1";
+            } else {
+              output += "0";
+            }
+          }
+          return output;
+        } else {
           alert("nombre de bits unsuffisants");
           return -1;
         }
       },
-      add_floating_bin : function(a,b){
-        if(a.exp == b.exp){
-          return this.__sign_test(a,b);
-        } else if ( a.exp < b.exp){
-          this.__increase(a,b);
-        } else{
-          this.__increase(b,a);
-        }
-        return this.__sign_test(a,b);
+      bin2dec: function(bin) {
+        return bin.split('').reverse().reduce(function(x, y, i) {
+          return (y === '1') ? x + Math.pow(2, i) : x;
+        }, 0);
       },
-      __sign_test: function(a,b){
-        if(a.sign == 0 && b.sign == 0)
-        {
+      add_floating_bin: function(a, b) {
+        if (a.exp == b.exp) {
+          return this.__sign_test(a, b);
+        } else if (a.exp < b.exp) {
+          this.__increase(a, b);
+          a.exp = b.exp;
+        } else {
+          this.__increase(b, a);
+          b.exp = a.exp;
+        }
+        return this.__sign_test(a, b);
+      },
+      __sign_test: function(a, b) {
+        var nb1 = a.mantiss;
+        var nb2 = b.mantiss;
+        if(nb1.length == 23) nb1 = "1" + nb1;
+        if(nb2.length == 23) nb2 = "1" + nb2;
+        if (a.sign == 0 && b.sign == 0) {
+          var newMantissa = this.__get_rid_last_bits(this.add_bin(nb1,nb2).substring(1));
           return {
             sign: 0,
-            result : this.add_bin(a.value,b.value)
+            mantissa: newMantissa.mantissa,
+            exp: this.add_bin(a.exp, this.dec2bin(newMantissa.overbits, Math.log2(newMantissa.overbits) + 1))
           };
-        }else if( a.sign == 1 && b.sign == 1){
+        } else if (a.sign == 1 && b.sign == 1) {
+          var newMantissa = this.__get_rid_last_bits(this.add_bin(nb1, nb2).substring(1));
           return {
             sign: 1,
-            result : this.add_bin(a.value,b.value)
+            mantissa: newMantissa.mantissa,
+            exp: this.add_bin(a.exp, this.dec2bin(newMantissa.overbits, Math.log2(newMantissa.overbits) + 1))
           };
-        }else if( a.sign == 1 && b.sign == 0){
+        } else if (a.sign == 1 && b.sign == 0) {
           //Switch man(a) man(b)
           b.mantiss = [a.mantiss, a.mantiss = b.mantiss][0];
           var sign = undefined;
-          if(a.mantiss > b.mantiss) sign = 1; else sign = 0;
+          if (a.mantiss > b.mantiss) sign = 1;
+          else sign = 0;
+          var newMantissa = this.__get_rid_last_bits(this.sub_bin(nb1, nb2).substring(1));
           return {
             sign: sign,
-            result : this.sub_bin(a.value,b.value)
+            mantissa: newMantissa.mantissa,
+            exp: this.add_bin(a.exp, this.dec2bin(newMantissa.overbits, Math.log2(newMantissa.overbits) + 1))
           };
-        }else{
+        } else {
           var sign = undefined;
-          if(b.mantiss > a.mantiss) sign = 1; else sign = 0;
+          if (b.mantiss > a.mantiss) sign = 1;
+          else sign = 0;
+          var newMantissa = this.__get_rid_last_bits(this.sub_bin(nb1, nb2).substring(1));
           return {
-            sign: sign,
-            result : this.sub_bin(a.value,b.value)
+            sign: 0,
+            mantissa: newMantissa.mantissa,
+            exp: this.add_bin(a.exp, this.dec2bin(newMantissa.overbits, Math.log2(newMantissa.overbits) + 1))
           };
         }
       },
-      __increase : function(toIncrease,ref){
-        var decal = ref.exp - toIncrease.exp;
-        toIncrease.exp = toIncrease.mantiss >> decal;
+      __increase: function(toIncrease, ref) {
+        var decal = parseInt(converter.bin2dec(ref.exp)) - parseInt(converter.bin2dec(toIncrease.exp));
+        toIncrease.mantiss = converter.dec2bin(
+          (
+            parseInt(converter.bin2dec("1" + toIncrease.mantiss)) >> decal).toString(),
+          Math.log2(parseInt(converter.bin2dec("1" + toIncrease.mantiss))) + 1
+        );
+        toIncrease.mantiss = this.__get_rid_last_bits(toIncrease.mantiss,24).mantissa;
+      },
+      __get_rid_last_bits: function(mantissa,n_bits=23) {
+        var overbitsToRemove = mantissa.length - n_bits;
+        if (overbitsToRemove === 0) {
+          return {
+            mantissa: mantissa,
+            overbits: 0
+          };
+        } else {
+          mantissa = mantissa.substring(0, mantissa.length - overbitsToRemove);
+          return {
+            mantissa: mantissa,
+            overbits: overbitsToRemove
+          };
+        }
       },
       sub_bin: function(a, b) {
         var add1 = "01";
@@ -220,21 +270,21 @@
       isNumber: function(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
       },
-      getNbBitsForExponent : function(n_bits_total) {
-        if(n_bits_total >= 8 && n_bits_total <= 16) { //eq. pente : y = 1/8 x + 3
-          return Math.round((1/8)*n_bits_total+3);
-        } else if(n_bits_total > 16 && n_bits_total <= 32) { //eq. pente : y = 3/16 x + 2
-          return Math.round((3/16)*n_bits_total+2);
-        } else if(n_bits_total > 32 && n_bits_total <= 64) { //eq. pente : y = 3/32 x + 5
-          return Math.round((3/32)*n_bits_total+5);
-        } else if(n_bits_total > 64 && n_bits_total <= 80) { //eq. pente : y = 1/4 x + -5
-          return Math.round((1/4)*n_bits_total-5);
-        } else if(n_bits_total > 80 && n_bits_total <= 128) { //eq. pente : y = 15
+      getNbBitsForExponent: function(n_bits_total) {
+        if (n_bits_total >= 8 && n_bits_total <= 16) { //eq. pente : y = 1/8 x + 3
+          return Math.round((1 / 8) * n_bits_total + 3);
+        } else if (n_bits_total > 16 && n_bits_total <= 32) { //eq. pente : y = 3/16 x + 2
+          return Math.round((3 / 16) * n_bits_total + 2);
+        } else if (n_bits_total > 32 && n_bits_total <= 64) { //eq. pente : y = 3/32 x + 5
+          return Math.round((3 / 32) * n_bits_total + 5);
+        } else if (n_bits_total > 64 && n_bits_total <= 80) { //eq. pente : y = 1/4 x + -5
+          return Math.round((1 / 4) * n_bits_total - 5);
+        } else if (n_bits_total > 80 && n_bits_total <= 128) { //eq. pente : y = 15
           return 15;
-        } else if(n_bits_total > 128 && n_bits_total <= 256) { //eq. pente : y = 1/32 x + 11
-          return Math.round((1/32)*n_bits_total+11);
+        } else if (n_bits_total > 128 && n_bits_total <= 256) { //eq. pente : y = 1/32 x + 11
+          return Math.round((1 / 32) * n_bits_total + 11);
         } else {
-          alert("Le nombre de bits "+n_bits_total+" n'est pas pris en compte! Valeur entre 8 et 256!");
+          alert("Le nombre de bits " + n_bits_total + " n'est pas pris en compte! Valeur entre 8 et 256!");
           return 0;
         }
       },
@@ -243,29 +293,29 @@
 
         var newRow = table.insertRow(-1);
         var column = newRow.insertCell(0);
-        column.align="center";
+        column.align = "center";
         column.innerHTML = n_bits;
 
         var column = newRow.insertCell(1);
-        column.align="center";
+        column.align = "center";
         column.innerHTML = value;
 
         column = newRow.insertCell(2);
-        column.align="center";
+        column.align = "center";
         column.innerHTML = signe;
 
         column = newRow.insertCell(3);
-        column.align="center";
+        column.align = "center";
         column.innerHTML = exponent;
 
         column = newRow.insertCell(4);
-        column.align="center";
+        column.align = "center";
         column.innerHTML = mantisse;
       },
       float2Binary: function(value, n_bits) {
 
         var nbBitsExp = this.getNbBitsForExponent(n_bits);
-        if(nbBitsExp == 0) {
+        if (nbBitsExp == 0) {
           return;
         }
         var signe = -1;
@@ -277,13 +327,12 @@
         var valueInt = Math.abs(parseInt(value));
         var valueIntBin = "0";
         if (valueInt != 0) {
-          valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt))+1);
+          valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt)) + 1);
         }
-        if(valueIntBin != -1)
-        {
+        if (valueIntBin != -1) {
           var fraction = Math.abs(Math.abs(value) - valueInt);
-          var d = Math.pow(2, nbBitsExp-1)-1;
-          var nbBitMantisse = n_bits-nbBitsExp-1;
+          var d = Math.pow(2, nbBitsExp - 1) - 1;
+          var nbBitMantisse = n_bits - nbBitsExp - 1;
           var fraction_tmp = fraction;
           var fractionBinary = "";
           var mantisse = "";
@@ -329,7 +378,7 @@
           var exposant_bin = converter.dec2bin(exposant_dec, nbBitsExp);
           converter.displayResult(n_bits, value, signe, exposant_bin, mantisse);
           var number_bin = document.getElementById("number_bin");
-          number_bin.value = signe+exposant_bin+mantisse;
+          number_bin.value = signe + exposant_bin + mantisse;
         }
       },
       binary2Float: function(value, n_bits) {
@@ -337,18 +386,18 @@
         var tableSigne = document.getElementById("table_ftob");
 
         var bitsExponent = this.getNbBitsForExponent(n_bits);
-        if(bitsExponent == 0) {
+        if (bitsExponent == 0) {
           return;
         }
 
-        var d = Math.pow(2, bitsExponent-1)-1;
+        var d = Math.pow(2, bitsExponent - 1) - 1;
         var bitsSigne = 1;
-        var bitsMantisse = n_bits-bitsExponent-1;
+        var bitsMantisse = n_bits - bitsExponent - 1;
         var result = 0;
 
         var signe = value.substring(0, bitsSigne);
         var exponent = value.substring(bitsSigne, bitsSigne + bitsExponent);
-        var mantisse = value.substring(bitsSigne + bitsExponent, bitsExponent + bitsMantisse+1);
+        var mantisse = value.substring(bitsSigne + bitsExponent, bitsExponent + bitsMantisse + 1);
 
         var j = 0;
         var floatMantisse = 0;
@@ -387,57 +436,64 @@
 
       }
     };
+
     function checkValueEnter(value, n_bits, type) {
-      if(type=="dec") {
-        if(!converter.isNumber(value)) {
-          alert(value+" n'est pas un nombre!");
+      if (type == "dec") {
+        if (!converter.isNumber(value)) {
+          alert(value + " n'est pas un nombre!");
           return false;
         }
-      } else if(type=="bin") {
-        if(value.length != n_bits) {
-          alert("Le nombre de bits entré ("+value.length+") ne correspond pas au nombre de bits total ("+n_bits+")");
+      } else if (type == "bin") {
+        if (value.length != n_bits) {
+          alert("Le nombre de bits entré (" + value.length + ") ne correspond pas au nombre de bits total (" + n_bits + ")");
           return false;
-        } else if(/^[01]+$/.test(value) == 0) {
-            alert("Le nombre "+value+" n'est pas un nombre binaire");
-            return false;
+        } else if (/^[01]+$/.test(value) == 0) {
+          alert("Le nombre " + value + " n'est pas un nombre binaire");
+          return false;
         }
       }
       return true;
     }
+
     function number_bin_onKeyUp(event) {
       updateLength();
       if (event.keyCode == 13) {
         convert_btof_onclick();
       }
     }
+
     function number_dec_onKeyUp(event) {
       updateLength();
       if (event.keyCode == 13) {
         convert_ftob_onclick();
       }
     }
+
     function updateLength() {
       var length = getLengthFieldBin();
       var div_length = document.getElementById("div_length");
       div_length.innerHTML = length;
     }
+
     function getLengthFieldBin() {
       return document.getElementById("number_bin").value.length;
     }
+
     function convert_ftob_onclick() {
-        var n_bits = document.getElementById("n_bits").value;
-        var number_dec = document.getElementById("number_dec").value;
-        if(checkValueEnter(number_dec, n_bits, "dec")) {
-          converter.float2Binary(number_dec, n_bits);
-        }
+      var n_bits = document.getElementById("n_bits").value;
+      var number_dec = document.getElementById("number_dec").value;
+      if (checkValueEnter(number_dec, n_bits, "dec")) {
+        converter.float2Binary(number_dec, n_bits);
+      }
     }
+
     function convert_btof_onclick() {
-        var length = getLengthFieldBin();
-        var n_bits = document.getElementById("n_bits").value;
-        var number_bin = document.getElementById("number_bin").value;
-        if(checkValueEnter(number_bin, n_bits, "bin")) {
-          converter.binary2Float(number_bin, n_bits);
-        }
+      var length = getLengthFieldBin();
+      var n_bits = document.getElementById("n_bits").value;
+      var number_bin = document.getElementById("number_bin").value;
+      if (checkValueEnter(number_bin, n_bits, "bin")) {
+        converter.binary2Float(number_bin, n_bits);
+      }
     }
     var operation_form = document.getElementById("operation-form");
     operation_form.onsubmit = function(event) {
