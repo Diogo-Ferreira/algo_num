@@ -64,9 +64,6 @@
 
     <h3>2. Opération</h3>
     <input type="submit" name="add" value="Addition" />
-    <input type="submit" name="sub" value="Soustraction" />
-    <input type="submit" name="mult" value="Multiplication" />
-    <input type="submit" name="div" value="Division" />
 
     <h3>3. Résultats</h3>
     <div id="operations-results"></div>
@@ -79,6 +76,8 @@
   var floatTwo = {value:"1000000011000000000000000000000" ,sign:"0",exp:"10000000",mantiss:"11000000000000000000000"}
   converter.add_floating_bin(floatOne,floatTwo)
   ce qui devrait donner normalment (7.0) : 01000000 11100000 00000000 00000000
+  ==============================================================================
+  Les méthodes précéder de __ sont des méthodes privés !
   */
     var converter = {
       dec2bin: function(dec, n_bits) {
@@ -269,76 +268,69 @@
         if(nbBitsExp == 0) {
           return;
         }
-
-        if(value==0){
-
-        }
-
         var signe = -1;
         if (value >= 0) {
           signe = 0;
         } else {
           signe = 1;
         }
-
         var valueInt = Math.abs(parseInt(value));
         var valueIntBin = "0";
         if (valueInt != 0) {
           valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt))+1);
         }
-        var fraction = Math.abs(Math.abs(value) - valueInt);
-        var d = Math.pow(2, nbBitsExp-1)-1;
-        var nbBitMantisse = n_bits-nbBitsExp-1;
-
-        var fraction_tmp = fraction;
-        var fractionBinary = "";
-        var mantisse = "";
-        var power = 0;
-        //Decalage à droite
-        if (valueInt == 0) {
-          var decalOk = false;
-          while (mantisse.length != nbBitMantisse) {
-            fraction_tmp *= 2;
-            if (fraction_tmp >= 1) {
-              if (!decalOk) {
-                decalOk = true;
-                power--;
-              } else {
+        if(valueIntBin != -1)
+        {
+          var fraction = Math.abs(Math.abs(value) - valueInt);
+          var d = Math.pow(2, nbBitsExp-1)-1;
+          var nbBitMantisse = n_bits-nbBitsExp-1;
+          var fraction_tmp = fraction;
+          var fractionBinary = "";
+          var mantisse = "";
+          var power = 0;
+          //Decalage à droite
+          if (valueInt == 0) {
+            var decalOk = false;
+            while (mantisse.length != nbBitMantisse) {
+              fraction_tmp *= 2;
+              if (fraction_tmp >= 1) {
+                if (!decalOk) {
+                  decalOk = true;
+                  power--;
+                } else {
+                  mantisse += "1";
+                }
+                fraction_tmp -= 1;
+              } else if (fraction_tmp < 1) {
+                if (decalOk) {
+                  mantisse += "0";
+                } else {
+                  power--;
+                }
+              }
+            }
+          } else { //Decalage à gauche
+            power = parseInt(Math.log2(valueInt));
+            mantisse = valueIntBin.substring(1, valueIntBin.length);
+            for (var i = mantisse.length; i < nbBitMantisse; i++) {
+              fraction_tmp *= 2;
+              if (fraction_tmp >= 1) {
                 mantisse += "1";
-              }
-              fraction_tmp -= 1;
-            } else if (fraction_tmp < 1) {
-              if (decalOk) {
+                fraction_tmp -= 1;
+              } else if (fraction_tmp < 1) {
                 mantisse += "0";
-              } else {
-                power--;
+              }
+              if (fraction_tmp == 1) {
+                break;
               }
             }
           }
-        } else { //Decalage à gauche
-          power = parseInt(Math.log2(valueInt));
-          mantisse = valueIntBin.substring(1, valueIntBin.length);
-          for (var i = mantisse.length; i < nbBitMantisse; i++) {
-            fraction_tmp *= 2;
-            if (fraction_tmp >= 1) {
-              mantisse += "1";
-              fraction_tmp -= 1;
-            } else if (fraction_tmp < 1) {
-              mantisse += "0";
-            }
-            if (fraction_tmp == 1) {
-              break;
-            }
-          }
+          var exposant_dec = d + power;
+          var exposant_bin = converter.dec2bin(exposant_dec, nbBitsExp);
+          converter.displayResult(n_bits, value, signe, exposant_bin, mantisse);
+          var number_bin = document.getElementById("number_bin");
+          number_bin.value = signe+exposant_bin+mantisse;
         }
-
-        var exposant_dec = d + power;
-        var exposant_bin = converter.dec2bin(exposant_dec, nbBitsExp);
-
-        converter.displayResult(n_bits, value, signe, exposant_bin, mantisse);
-
-        var number_bin = document.getElementById("number_bin");
-        number_bin.value = signe+exposant_bin+mantisse;
       },
       binary2Float: function(value, n_bits) {
 
@@ -395,7 +387,6 @@
 
       }
     };
-
     function checkValueEnter(value, n_bits, type) {
       if(type=="dec") {
         if(!converter.isNumber(value)) {
@@ -413,31 +404,26 @@
       }
       return true;
     }
-
     function number_bin_onKeyUp(event) {
       updateLength();
       if (event.keyCode == 13) {
         convert_btof_onclick();
       }
     }
-
     function number_dec_onKeyUp(event) {
       updateLength();
       if (event.keyCode == 13) {
         convert_ftob_onclick();
       }
     }
-
     function updateLength() {
       var length = getLengthFieldBin();
       var div_length = document.getElementById("div_length");
       div_length.innerHTML = length;
     }
-
     function getLengthFieldBin() {
       return document.getElementById("number_bin").value.length;
     }
-
     function convert_ftob_onclick() {
         var n_bits = document.getElementById("n_bits").value;
         var number_dec = document.getElementById("number_dec").value;
@@ -445,7 +431,6 @@
           converter.float2Binary(number_dec, n_bits);
         }
     }
-
     function convert_btof_onclick() {
         var length = getLengthFieldBin();
         var n_bits = document.getElementById("n_bits").value;
@@ -454,9 +439,7 @@
           converter.binary2Float(number_bin, n_bits);
         }
     }
-
     var operation_form = document.getElementById("operation-form");
-
     operation_form.onsubmit = function(event) {
       event.preventDefault();
     }
