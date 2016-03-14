@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--Labo 1 - Groupe 1 -->
 <html>
 
 <head>
@@ -60,7 +61,12 @@
   <hr/>
 
   <h1>Calculs binaire</h1>
-
+  <h4>Attention !</h4>
+  <ul>
+    <li>Malheuresement l'addition ne fonctionne que pour les nombres positifs, le nombres négatifs ont tendance à donner de faux résultats !</li>
+    <li>Pour qu'un nombre entré pendant la conversion apparait dans la liste déroulante, il doit être en 32 bits !</li>
+    <li>Evidemment si les résultats dépassent la capacité d'un 32 bits, ceux-ci seront érronées</li>
+  </ul>
   <form id="operation-form">
     <h3>1. Arguments en binaire 32 bits (Signe (1), Exposant (8), Mantisse (23))</h3>
     <p>
@@ -105,6 +111,7 @@
   <br/>
   <button onclick="removeTable(table_results_operation);">Effacer</button>
   <script>
+    //Objet principale pour les opérations, __ précéder d'un champs signifie qu'il est privé
     var converter = {
       dec2bin: function(dec, n_bits) {
         if (n_bits >= Math.log2(dec)) {
@@ -123,7 +130,7 @@
           return output;
         } else {
           alert("nombre de bits unsuffisants");
-          return -1;
+          return "error";
         }
       },
       bin2dec: function(bin) {
@@ -143,6 +150,7 @@
         }
         return this.__sign_test(a, b);
       },
+      //Traitement du signe pour l'addition floatante
       __sign_test: function(a, b) {
         //Ajout bit fantôme si celui n'y est pas encore
         var nb1 = a.mantiss;
@@ -170,6 +178,7 @@
           if (nb2 > nb1) sign = 1;
           else sign = 0;
         }
+        //Calcul l'exposant suivant les bits en trop dans la mantisse
         var exp = this.add_bin(a.exp, this.dec2bin(newMantissa.overbits, Math.log2(newMantissa.overbits) + 1));
         return {
           sign: sign,
@@ -177,6 +186,7 @@
           exp: exp
         };
       },
+      //Normalisation de l'exposant pour l'addition floatante
       __increase: function(toIncrease, ref) {
         var decal = parseInt(converter.bin2dec(ref.exp)) - parseInt(converter.bin2dec(toIncrease.exp));
         /*Pour faire le shift, il faut d'abord stocker le nombre comme un nombre dans la mémoire,
@@ -192,6 +202,7 @@
         //Ici 24, pour conserver le bit fantôme pour la suite
         toIncrease.mantiss = this.__get_rid_last_bits(toIncrease.mantiss, 24).mantissa;
       },
+      //Vérifie que la mantisse est de la bonne taille, sinon retourne le nombre de bits à retirer
       __get_rid_last_bits: function(mantissa, n_bits) {
         n_bits = typeof n_bits !== 'undefined' ? n_bits : 23;
         var overbitsToRemove = mantissa.length - n_bits;
@@ -347,6 +358,7 @@
         if (valueInt != 0) {
           valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt)) + 1);
         }
+
 
         if (value == 0) {
           while (mantisse.length != nbBitMantisse) {
@@ -542,13 +554,16 @@
       var number_dec = document.getElementById("number_dec").value;
       if (checkValueEnter(number_dec, n_bits, "dec")) {
         var result = converter.float2Binary(number_dec, n_bits);
-        if(n_bits == 32) {
-          addToComboBox(result);
+        if(result.exponent != "error")
+        {
+          if(n_bits == 32) {
+            addToComboBox(result);
+          }
+          converter.displayResult("table_results", result.n_bits, result.value, result.sign, result.exponent, result.mantisse);
+          var number_bin = document.getElementById("number_bin");
+          number_bin.value = result.sign + result.exponent + result.mantisse;
+          updateLength();
         }
-        converter.displayResult("table_results", result.n_bits, result.value, result.sign, result.exponent, result.mantisse);
-        var number_bin = document.getElementById("number_bin");
-        number_bin.value = result.sign + result.exponent + result.mantisse;
-        updateLength();
       }
     }
 
