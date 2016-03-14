@@ -16,14 +16,14 @@
         <p>
           <label>
             Nombre de bits :
-            <input id="n_bits" type="number" min="8" max="256" value="16" name="n_bits" required="true" /> [8;256]
+            <input id="n_bits" type="number" min="8" max="256" value="32" name="n_bits" required="true" /> [8;256]
           </label>
         </p>
       </td>
     </tr>
     <tr>
       <td>
-        <h3>Conversion flottant <=> binaire</h3>
+        <h3>Conversion flottant <=> binaire (Appuyer sur enter avec le focus sur le bon champ)</h3>
       </td>
     </tr>
     <tr>
@@ -60,21 +60,25 @@
   <h1>Calculs binaire</h1>
 
   <form id="operation-form">
-    <h3>1. Arguments</h3>
+    <h3>1. Arguments en binaire 32 bits (Signe (1), Exposant (8), Mantisse (23))</h3>
     <p>
       <label>
-        Nombre 1 en binaire 32 bits (Signe, Exposant, Mantisse)
-        <input type="text" minlength="1" maxlength="1" pattern="[0-1]*" name="bin_sign_1" required="true" placeholder="signe" />
-        <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" name="bin_exp_1" required="true" placeholder="exposant" />
-        <input type="text" minlength="23" maxlength="23" pattern="[0-1]*" name="bin_mantissa_1" required="true" placeholder="mantisse" />
+        Nombre 1
+        <p>
+          <input type="text" minlength="1" maxlength="1" pattern="[0-1]*" name="bin_sign_1" required="true" placeholder="signe" />
+          <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" name="bin_exp_1" required="true" placeholder="exposant" />
+          <input type="text" minlength="23" maxlength="23" pattern="[0-1]*" name="bin_mantissa_1" required="true" placeholder="mantisse" />
+        </p>
       </label>
     </p>
     <p>
       <label>
-        Nombre 2 en binaire 32 bits (Signe, Exposant, Mantisse)
-        <input type="text" minlength="1" maxlength="1" pattern="[0-1]*" name="bin_sign_2" required="true" placeholder="signe" />
-        <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" name="bin_exp_2" required="true" placeholder="exposant" />
-        <input type="text" minlength="23" maxlength="23" pattern="[0-1]*" name="bin_mantissa_2" required="true" placeholder="mantisse" />
+        Nombre 2
+        <p>
+          <input type="text" minlength="1" maxlength="1" pattern="[0-1]*" name="bin_sign_2" required="true" placeholder="signe" />
+          <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" name="bin_exp_2" required="true" placeholder="exposant" />
+          <input type="text" minlength="23" maxlength="23" pattern="[0-1]*" name="bin_mantissa_2" required="true" placeholder="mantisse" />
+        </p>
       </label>
     </p>
 
@@ -141,19 +145,19 @@
         //Test du signe
         if (a.sign == 0 && b.sign == 0) {
           newMantissa = this.__get_rid_last_bits(this.add_bin(nb1, nb2).substring(1));
-          sign  = 0;
-        }else if(a.sign == 1 && b.sign == 1){
+          sign = 0;
+        } else if (a.sign == 1 && b.sign == 1) {
           newMantissa = this.__get_rid_last_bits(this.add_bin(nb1, nb2).substring(1));
-          sign  = 1;
+          sign = 1;
         } else if (a.sign == 1 && b.sign == 0) {
-          newMantissa = this.__get_rid_last_bits(this.sub_bin(nb1, nb2).substring(1));
           //Switch man(a) man(b)
-          b.mantiss = [a.mantiss, a.mantiss = b.mantiss][0];
-          if (a.mantiss > b.mantiss) sign = 1;
+          nb1 = [nb1, nb1 = nb2][0];
+          newMantissa = this.__get_rid_last_bits(this.sub_bin(nb1, nb2).substring(1));
+          if (nb1 > nb2) sign = 1;
           else sign = 0;
         } else {
           newMantissa = this.__get_rid_last_bits(this.sub_bin(nb1, nb2).substring(1));
-          if (b.mantiss > a.mantiss) sign = 1;
+          if (nb2 > nb1) sign = 1;
           else sign = 0;
         }
         var exp = this.add_bin(a.exp, this.dec2bin(newMantissa.overbits, Math.log2(newMantissa.overbits) + 1));
@@ -165,7 +169,7 @@
       },
       __increase: function(toIncrease, ref) {
         var decal = parseInt(converter.bin2dec(ref.exp)) - parseInt(converter.bin2dec(toIncrease.exp));
-        /*Pour faire le shit, il faut d'abord stocker le nombre comme un nombre dans la mémoire,
+        /*Pour faire le shift, il faut d'abord stocker le nombre comme un nombre dans la mémoire,
          * c'est à dire le convertir de bin -> dec et ensuite le parser en int. Sinon le décalage se
          * fera sur une chaine de caractères et non un nombre ! Bien entendu on profitera de mettre en place,
          * le bit fantôme au début de la chaîne.
@@ -179,7 +183,7 @@
         toIncrease.mantiss = this.__get_rid_last_bits(toIncrease.mantiss, 24).mantissa;
       },
       __get_rid_last_bits: function(mantissa, n_bits) {
-        n_bits = typeof n_bits !== 'undefined' ?  n_bits : 23;
+        n_bits = typeof n_bits !== 'undefined' ? n_bits : 23;
         var overbitsToRemove = mantissa.length - n_bits;
         if (overbitsToRemove === 0) {
           return {
@@ -195,26 +199,29 @@
         }
       },
       sub_bin: function(a, b) {
-        var add1 = "01";
-        if (a.length >= b.length) {
-          var nombre1 = a.split("");
-          var nombre2 = b.split("");
-        } else {
-          var nombre1 = b.split("");
-          var nombre2 = a.split("");
+        var result = "";
+        var remainder = "0";
+        if (a.length > b.length) {
+          var decal = a.length - b.length;
+          for (var i = 0; i < decal; i++)
+            b = "0" + b;
+        } else if (b.length > a.length) {
+          var decal = b.length - a.length;
+          for (var i = 0; i < decal; i++)
+            a = "0" + a;
         }
-        for (var k = 0; k < nombre2.length; k++) {
-          if (nombre2[k] == 1) {
-            nombre2[k] = "0";
-          } else {
-            nombre2[k] = "1";
-          }
+
+        var newB = "";
+        for (var i = 0; i < b.length; i++) {
+          if (b.charAt(i) == "1") newB += "0";
+          else if (b.charAt(i) == "0") newB += "1";
         }
-        var resultat = converter.add_bin(nombre1.join(""), nombre2.join(""));
-        var deduit = resultat.split("");
-        delete deduit[0];
-        var resultatFinal = converter.add_bin(deduit.join(""), add1);
-        return resultatFinal;
+        b = newB;
+        b = this.add_bin(b, "1");
+        var sum = this.add_bin(a, b);
+
+        result = sum.substring(sum.length - a.length);
+        return result;
       },
       add_bin: function(a, b) {
 
@@ -311,29 +318,35 @@
         column.innerHTML = mantisse;
       },
       float2Binary: function(value, n_bits) {
-
         var nbBitsExp = this.getNbBitsForExponent(n_bits);
         if (nbBitsExp == 0) {
+          alert("Erreur du calcul de nombre de bits de l'exposant");
           return;
         }
-        var signe = -1;
+        var mantisse = "";
+        var exposant_bin = "";
+        var nbBitMantisse = n_bits - nbBitsExp - 1;
+        var signe = 1;
         if (value >= 0) {
           signe = 0;
-        } else {
-          signe = 1;
         }
         var valueInt = Math.abs(parseInt(value));
         var valueIntBin = "0";
         if (valueInt != 0) {
           valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt)) + 1);
         }
-        if (valueIntBin != -1) {
+        if (value == 0) {
+          while (mantisse.length != nbBitMantisse) {
+            mantisse += "0";
+          }
+          while (exposant_bin.length != nbBitsExp) {
+            exposant_bin += "0";
+          }
+        } else if (valueIntBin != -1) {
           var fraction = Math.abs(Math.abs(value) - valueInt);
           var d = Math.pow(2, nbBitsExp - 1) - 1;
-          var nbBitMantisse = n_bits - nbBitsExp - 1;
           var fraction_tmp = fraction;
           var fractionBinary = "";
-          var mantisse = "";
           var power = 0;
           //Decalage à droite
           if (valueInt == 0) {
@@ -373,70 +386,62 @@
             }
           }
           var exposant_dec = d + power;
-          var exposant_bin = converter.dec2bin(exposant_dec, nbBitsExp);
-          converter.displayResult("table_results", n_bits, value, signe, exposant_bin, mantisse);
-          var number_bin = document.getElementById("number_bin");
-          number_bin.value = signe + exposant_bin + mantisse;
-          updateLength();
+          exposant_bin = converter.dec2bin(exposant_dec, nbBitsExp);
         }
+        converter.displayResult("table_results", n_bits, value, signe, exposant_bin, mantisse);
+        var number_bin = document.getElementById("number_bin");
+        number_bin.value = signe + exposant_bin + mantisse;
+        updateLength();
       },
       binary2Float: function(value, n_bits) {
-
         var tableSigne = document.getElementById("table_ftob");
-
         var bitsExponent = this.getNbBitsForExponent(n_bits);
         if (bitsExponent == 0) {
           return;
         }
-
         var d = Math.pow(2, bitsExponent - 1) - 1;
         var bitsSigne = 1;
         var bitsMantisse = n_bits - bitsExponent - 1;
         var result = 0;
-
         var signe = value.substring(0, bitsSigne);
         var exponent = value.substring(bitsSigne, bitsSigne + bitsExponent);
         var mantisse = value.substring(bitsSigne + bitsExponent, bitsExponent + bitsMantisse + 1);
-
-        var j = 0;
-        var floatMantisse = 0;
-        for (var i = bitsMantisse - 1; i >= 0; --i) {
-          var bit = parseInt(mantisse[i]);
-          if (bit == 1) {
-            floatMantisse += Math.pow(2, j);
+        if(exponent.indexOf('1') != -1 || mantisse.indexOf('1') != -1) {
+          var j = 0;
+          var floatMantisse = 0;
+          for (var i = bitsMantisse - 1; i >= 0; --i) {
+            var bit = parseInt(mantisse[i]);
+            if (bit == 1) {
+              floatMantisse += Math.pow(2, j);
+            }
+            j++;
           }
-          j++;
-        }
-        floatMantisse += Math.pow(2, bitsMantisse);
-        floatMantisse /= Math.pow(2, bitsMantisse);
-
-        var power = 0;
-        j = 0;
-        for (var i = bitsExponent - 1; i >= 0; --i) {
-          var bit = parseInt(exponent[i]);
-          if (bit == 1) {
-            power += Math.pow(2, j);
+          floatMantisse += Math.pow(2, bitsMantisse);
+          floatMantisse /= Math.pow(2, bitsMantisse);
+          var power = 0;
+          j = 0;
+          for (var i = bitsExponent - 1; i >= 0; --i) {
+            var bit = parseInt(exponent[i]);
+            if (bit == 1) {
+              power += Math.pow(2, j);
+            }
+            j++;
           }
-          j++;
+          var exponentInt = Math.pow(2, power - d);
+          result = floatMantisse * exponentInt;
+          var bit = parseInt(signe);
+          if (bit == 1) {
+            result = -result;
+          }
         }
-
-        var exponentInt = Math.pow(2, power - d);
-
-        result = floatMantisse * exponentInt;
-        var bit = parseInt(signe);
-        if (bit == 1) {
-          result = -result;
-        }
-
         converter.displayResult("table_results", n_bits, result, signe, exponent, mantisse);
-
         var number_dec = document.getElementById("number_dec");
         number_dec.value = result;
       }
     };
 
     function checkValueEnter(value, n_bits, type) {
-      if(value == "") {
+      if (value == "") {
         alert("Entré une valeur!");
         return false;
       }
