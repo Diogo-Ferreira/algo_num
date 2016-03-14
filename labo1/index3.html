@@ -8,7 +8,7 @@
 
 <body>
   <header>
-    <h1>Conversion IEE-754</h1>
+    <h1>Conversion IEEE-754</h1>
   </header>
   <table id="main">
     <tr>
@@ -29,14 +29,14 @@
     <tr>
       <td>
         <p>Nombre flottant :
-          <input id="number_dec" type="number" step="0.1" required="true" onkeyup="number_dec_onKeyUp(event);" />
+          <input id="number_dec" type="number" step="0.1" onkeyup="number_dec_onKeyUp(event);" />
         </p>
       </td>
     </tr>
     <tr>
       <td>
         <p>Nombre binaire :
-          <input id="number_bin" type="text" required="true" onkeyup="number_bin_onKeyUp(event);" />
+          <input id="number_bin" type="text" onkeyup="number_bin_onKeyUp(event);" />
         </p>
       </td>
       <td>
@@ -178,7 +178,8 @@
         //Ici 24, pour conserver le bit fantôme pour la suite
         toIncrease.mantiss = this.__get_rid_last_bits(toIncrease.mantiss, 24).mantissa;
       },
-      __get_rid_last_bits: function(mantissa, n_bits = 23) {
+      __get_rid_last_bits: function(mantissa, n_bits) {
+        n_bits = typeof n_bits !== 'undefined' ?  n_bits : 23;
         var overbitsToRemove = mantissa.length - n_bits;
         if (overbitsToRemove === 0) {
           return {
@@ -376,6 +377,7 @@
           converter.displayResult("table_results", n_bits, value, signe, exposant_bin, mantisse);
           var number_bin = document.getElementById("number_bin");
           number_bin.value = signe + exposant_bin + mantisse;
+          updateLength();
         }
       },
       binary2Float: function(value, n_bits) {
@@ -430,11 +432,14 @@
 
         var number_dec = document.getElementById("number_dec");
         number_dec.value = result;
-
       }
     };
 
     function checkValueEnter(value, n_bits, type) {
+      if(value == "") {
+        alert("Entré une valeur!");
+        return false;
+      }
       if (type == "dec") {
         if (!converter.isNumber(value)) {
           alert(value + " n'est pas un nombre!");
@@ -492,6 +497,7 @@
         converter.binary2Float(number_bin, n_bits);
       }
     }
+
     var operation_form = document.getElementById("operation-form");
     operation_form.onsubmit = function(event) {
       event.preventDefault();
