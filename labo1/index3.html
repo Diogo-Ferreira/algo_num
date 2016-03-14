@@ -135,8 +135,8 @@
       },
       __sign_test: function(a, b) {
         //Ajout bit fantôme si celui n'y est pas encore
-        var nb1 = a.mantiss;
-        var nb2 = b.mantiss;
+        var nb1 = a.mantissa;
+        var nb2 = b.mantissa;
         if (nb1.length == 23) nb1 = "1" + nb1;
         if (nb2.length == 23) nb2 = "1" + nb2;
         var newMantissa = undefined;
@@ -174,13 +174,13 @@
          * fera sur une chaine de caractères et non un nombre ! Bien entendu on profitera de mettre en place,
          * le bit fantôme au début de la chaîne.
          */
-        toIncrease.mantiss = converter.dec2bin(
+        toIncrease.mantissa = converter.dec2bin(
           (
-            parseInt(converter.bin2dec("1" + toIncrease.mantiss)) >> decal).toString(),
-          Math.log2(parseInt(converter.bin2dec("1" + toIncrease.mantiss))) + 1
+            parseInt(converter.bin2dec("1" + toIncrease.mantissa)) >> decal).toString(),
+          Math.log2(parseInt(converter.bin2dec("1" + toIncrease.mantissa))) + 1
         );
         //Ici 24, pour conserver le bit fantôme pour la suite
-        toIncrease.mantiss = this.__get_rid_last_bits(toIncrease.mantiss, 24).mantissa;
+        toIncrease.mantissa = this.__get_rid_last_bits(toIncrease.mantissa, 24).mantissa;
       },
       __get_rid_last_bits: function(mantissa, n_bits) {
         n_bits = typeof n_bits !== 'undefined' ? n_bits : 23;
@@ -523,12 +523,12 @@
         value: elements.bin_exp_1.value + elements.bin_mantissa_1.value,
         sign: elements.bin_sign_1.value,
         exp: elements.bin_exp_1.value,
-        mantiss: elements.bin_mantissa_1.value.toString()
+        mantissa: elements.bin_mantissa_1.value.toString()
       }, {
         value: elements.bin_exp_2.value + elements.bin_mantissa_2.value,
         sign: elements.bin_sign_2.value,
         exp: elements.bin_exp_2.value,
-        mantiss: elements.bin_mantissa_2.value.toString()
+        mantissa: elements.bin_mantissa_2.value.toString()
       });
       converter.displayResult("table_results_operation", 32, res.sign + res.exp + res.mantissa, res.sign, res.exp, res.mantissa);
     }
