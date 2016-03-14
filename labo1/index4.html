@@ -110,6 +110,36 @@
   </form>
   <br/>
   <button onclick="removeTable(table_results_operation);">Effacer</button>
+  <hr />
+  <h1>Rapport</h1>
+  <div>
+    <h2>Introduction</h2>
+    Ce laboratoire a été réalisé dans le cadre du cours d’algorithmes numériques. Ce projet porte sur le codage des nombres. Il a été demandé de pouvoir convertir des nombres flottants, positif ou négatif, en binaire et inversement. De plus, l’opération de l’addition a été ajoutée. Ce laboratoire a été réalisé en HTML5 et en javascript.
+    <h2>Méthode de développement</h2>
+    </h3>Conversion décimal-binaire</h3>
+    Pour commencer, nous avons travaillé avec un codage sur 32 bits. Dans ce cas, la mantisse vaut 23 bits, l’exposant 8 bits et le signe 1 bit. Plusieurs étapes sont nécessaires afin de convertir notre nombre. Premièrement, il faut déterminer le bit de signe. Ensuite, on doit convertir la partie décimale en binaire, puis la fraction en binaire. Finalement, il ne reste plus qu’à calculer l’exposant et la mantisse.
+    <h3>Déterminer le bit de signe</h3>
+    Le bit de signe vaut 0 si le nombre est positif. Il vaudra 1 dans le cas où le nombre est négatif.
+    <h3>Convertir la partie décimale en binaire</h3>
+    La partie décimale est la partie du nombre avant la virgule. Il suffira de convertir cette partie en binaire grâce à ce qui a déjà été fait au laboratoire précédent.
+    <h3>Convertir la fraction en binaire</h3>
+    La fraction est la partie du nombre qui se trouve après la virgule. Il font donc convertir cette partie en binaire. La conversion se fait normalement, sauf qu’il faut utiliser des puissances de 2 négatives. Dans certains cas, il sera impossible d’approximer exactement la valeur de la fraction avec des puissances de 2. On pourra descendre jusqu’à la vingt-troisième puissance de 2, 23 correspondant à la taille de la mantisse.
+    <h3>Calcul de l’exposant</h3>
+    Il faut maintenant normaliser le nombre pour qu’il corresponde à la norme IEE-754. Il va donc falloir décaler la virgule de notre nombre binaire composé de la partie décimale et de la fraction. On va décaler la virgule vers la gauche jusqu’au dernier 1 qui correspond au bit caché, si le nombre décimal est plus grand que 1. S’il est plus petit, il faudra décaler vers la droite jusqu’au premier bit à 1.
+    Suivant le nombre de positions décalées avec la virgule, on va obtenir l’exposant. C’est-à-dire la puissance de 2 correspondante. Il faudra ensuite convertir notre exposant en binaire avec le décalage de 127. La partie qui se trouve à droite de la virgule, si on l’a décalée contre la gauche, est une partie de la mantisse.
+    <h3>Calcul de la mantisse</h3>
+    Toutes les étapes du calcul sont faites. Il suffit juste d’écrire la mantisse pour qu’elle ait une taille de 23 bits. Il va falloir rajouter des 0 si elle n’est pas assez grande. Si elle est trop grande, il va falloir la couper et garder que les bits les plus significatifs.
+    <h2>Conversion binaire-décimal</h2>
+    On va commencer par regarder la mantisse. On va la convertir en nombre réel. Pour cela, on va multiplier chaque puissance de 2 qui la compose par un 1 ou un 0 suivant sa valeur, puis additionner toutes les puissances. On obtiendra ainsi un réel qu’il faudra diviser par 2 puissance 23. Ensuite on va regarder l’exposant. Il suffit de le convertir en décimal puis d’y supprimer le décalage de 127. Alors, il suffit de multiplier la mantisse par 2 puissance l’exposant. Finalement, il faut regarder le bit de signe pour savoir si le nombre trouvé est positif ou négatif.
+    <h2>Addition</h2>
+    Plusieurs tests ont été réalisés pour coder l’addition correctement. Notamment sur le signe des deux nombres à additionner et sur leurs exposants.
+    Premièrement, il faut tester la valeur des exposants. Si elle est égale, il faudra tester les signes. Si elle n’est pas égale, il va falloir augmenter l’exposant le plus petit afin qu’il ait la même taille que le plus grand. Ensuite il faut tester le signe. L’augmentation de l’exposant le plus petit entraîne une perte des bits les moins significatifs car des 0 sont rajoutés sur la gauche de la mantisse.
+    Deuxièmement, il faut tester le signe. Si les deux signes sont positifs, il suffit de faire une addition simple des deux mantisses. Le signe du résultat sera lui aussi positif. Si les deux signes sont négatifs, là encore, il suffit d’additionner simplement. Mais dans ce cas le signe du résultat sera négatif. Si les signes sont positif puis négatif, comme dans 8-5, il faudra effectuer une simple soustraction. Cependant, il va falloir tester lequel des deux nombres a une mantisse plus grande que l’autre. Si le nombre positif a la mantisse la plus grande, alors le résultat sera positif, sinon il sera négatif. Finalement, si les signes sont négatif puis positif, comme dans -5+8, on va inverser les deux mantisses puis faire une simple soustraction. Là encore, il faudra tester quelle mantisse est la plus grande afin de déterminer le signe du résultat. Si l’addition ou la soustraction des deux mantisses donne un nombre binaire de plus de 23 bits, les derniers bits seront perdus et le nombre de bits perdu sera additionné à l’exposant final.[a]
+    <h2>Conclusion</h2>
+    Le programme fonctionne correctement dans les deux sens. C’est-à-dire la conversion flottant à binaire ainsi que binaire à flottant. On peut cependant remarquer des erreurs d’arrondis qui sont sans doute dues à une perte des bits les moins significatifs. Il est de plus possible de choisir sur combien de bits la conversion s’effectue. Néanmoins, seules des valeurs de puissance de 2 ont été choisies. Elles vont de 8 à 256. Les tailles de la mantisse et de l’exposant s’adaptent donc selon le choix de l’utilisateur. La partie addition, quant à elle, ne s’effectue que sur 32 bits. Cette dernière marche seulement lorsque les deux nombres à additionner sont positifs. De plus, il ne faut pas qu’ils soient trop grands ou trop petits, sinon cela ne va plus marcher. En effet, il n’est pas possible de coder tous les nombres sur 32 bits et la précisions ne sera pas toujours excellente.
+    Il serait intéressant de modifier ce laboratoire de telle sorte que l’addition fonctionne correctement et qu’elle puisse s’effectuer avec du codage autre que 32 bits.
+
+  </div>
   <script>
     //Objet principale pour les opérations, __ précéder d'un champs signifie qu'il est privé
     var converter = {
