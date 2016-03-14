@@ -323,9 +323,11 @@
           alert("Erreur du calcul de nombre de bits de l'exposant");
           return;
         }
+
         var mantisse = "";
         var exposant_bin = "";
         var nbBitMantisse = n_bits - nbBitsExp - 1;
+
         var signe = 1;
         if (value >= 0) {
           signe = 0;
@@ -335,6 +337,7 @@
         if (valueInt != 0) {
           valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt)) + 1);
         }
+
         if (value == 0) {
           while (mantisse.length != nbBitMantisse) {
             mantisse += "0";
@@ -395,18 +398,22 @@
       },
       binary2Float: function(value, n_bits) {
         var tableSigne = document.getElementById("table_ftob");
+
         var bitsExponent = this.getNbBitsForExponent(n_bits);
         if (bitsExponent == 0) {
           return;
         }
+
         var d = Math.pow(2, bitsExponent - 1) - 1;
         var bitsSigne = 1;
         var bitsMantisse = n_bits - bitsExponent - 1;
         var result = 0;
+
         var signe = value.substring(0, bitsSigne);
         var exponent = value.substring(bitsSigne, bitsSigne + bitsExponent);
         var mantisse = value.substring(bitsSigne + bitsExponent, bitsExponent + bitsMantisse + 1);
-        if(exponent.indexOf('1') != -1 || mantisse.indexOf('1') != -1) {
+
+        if (exponent.indexOf('1') != -1 || mantisse.indexOf('1') != -1) {
           var j = 0;
           var floatMantisse = 0;
           for (var i = bitsMantisse - 1; i >= 0; --i) {
@@ -418,6 +425,7 @@
           }
           floatMantisse += Math.pow(2, bitsMantisse);
           floatMantisse /= Math.pow(2, bitsMantisse);
+
           var power = 0;
           j = 0;
           for (var i = bitsExponent - 1; i >= 0; --i) {
@@ -427,14 +435,18 @@
             }
             j++;
           }
+
           var exponentInt = Math.pow(2, power - d);
+
           result = floatMantisse * exponentInt;
           var bit = parseInt(signe);
           if (bit == 1) {
             result = -result;
           }
         }
+
         converter.displayResult("table_results", n_bits, result, signe, exponent, mantisse);
+
         var number_dec = document.getElementById("number_dec");
         number_dec.value = result;
       }
