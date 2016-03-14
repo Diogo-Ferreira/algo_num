@@ -63,14 +63,18 @@
     <h3>1. Arguments</h3>
     <p>
       <label>
-        Nombre 1
-        <input type="text" pattern="[0-1]*" name="bin_nb_1" required="true" />
+        Nombre 1 en binaire 32 bits (Signe, Exposant, Mantisse)
+        <input type="text" minlength="1" maxlength="1" pattern="[0-1]*" name="bin_sign_1" required="true" placeholder="signe" />
+        <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" name="bin_exp_1" required="true" placeholder="exposant"/>
+        <input type="text" minlength="23" maxlength="23" pattern="[0-1]*" name="bin_mantissa_1" required="true" placeholder="mantisse"/>
       </label>
     </p>
     <p>
       <label>
-        Nombre 2
-        <input type="text" pattern="[0-1]*" name="bin_nb_2" required="true" />
+        Nombre 2 en binaire 32 bits (Signe, Exposant, Mantisse)
+        <input type="text" minlength="1" maxlength="1" pattern="[0-1]*" name="bin_sign_2" required="true" placeholder="signe" />
+        <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" name="bin_exp_2" required="true" placeholder="exposant"/>
+        <input type="text" minlength="23" maxlength="23" pattern="[0-1]*" name="bin_mantissa_2" required="true" placeholder="mantisse"/>
       </label>
     </p>
 
@@ -78,7 +82,13 @@
     <input type="submit" name="add" value="Addition" />
 
     <h3>3. Résultats</h3>
-    <div id="operations-results"></div>
+    <table id="table_results_operation" border="1">
+      <th align="center">Nombre de bits</th>
+      <th align="center">Valeur</th>
+      <th align="center">Signe</th>
+      <th align="center">Exposant</th>
+      <th align="center">Mantisse</th>
+    </table>
   </form>
   <script>
     /*
@@ -132,8 +142,12 @@
       __sign_test: function(a, b) {
         var nb1 = a.mantiss;
         var nb2 = b.mantiss;
+        /*
+        TODO : simplifier le code --> newMantissa 1x, corriger sub_bin
+        */
         if(nb1.length == 23) nb1 = "1" + nb1;
         if(nb2.length == 23) nb2 = "1" + nb2;
+
         if (a.sign == 0 && b.sign == 0) {
           var newMantissa = this.__get_rid_last_bits(this.add_bin(nb1,nb2).substring(1));
           return {
@@ -174,11 +188,17 @@
       },
       __increase: function(toIncrease, ref) {
         var decal = parseInt(converter.bin2dec(ref.exp)) - parseInt(converter.bin2dec(toIncrease.exp));
+        /*Pour faire le shit, il faut d'abord stocker le nombre comme un nombre dans la mémoire,
+        * c'est à dire le convertir de bin -> dec et ensuite le parser en int. Sinon le décalage se
+        * fera sur une chaine de caractères et non un nombre ! Bien entendu on profitera de mettre en place,
+        * le bit fantôme au début de la chaîne.
+        */
         toIncrease.mantiss = converter.dec2bin(
           (
             parseInt(converter.bin2dec("1" + toIncrease.mantiss)) >> decal).toString(),
           Math.log2(parseInt(converter.bin2dec("1" + toIncrease.mantiss))) + 1
         );
+        //Ici 24, pour conserver le bit fantôme pour la suite
         toIncrease.mantiss = this.__get_rid_last_bits(toIncrease.mantiss,24).mantissa;
       },
       __get_rid_last_bits: function(mantissa,n_bits=23) {
@@ -288,8 +308,8 @@
           return 0;
         }
       },
-      displayResult: function(n_bits, value, signe, exponent, mantisse) {
-        var table = document.getElementById("table_results");
+      displayResult: function(table,n_bits, value, signe, exponent, mantisse) {
+        var table = document.getElementById(table);
 
         var newRow = table.insertRow(-1);
         var column = newRow.insertCell(0);
@@ -376,7 +396,7 @@
           }
           var exposant_dec = d + power;
           var exposant_bin = converter.dec2bin(exposant_dec, nbBitsExp);
-          converter.displayResult(n_bits, value, signe, exposant_bin, mantisse);
+          converter.displayResult("table_results",n_bits, value, signe, exposant_bin, mantisse);
           var number_bin = document.getElementById("number_bin");
           number_bin.value = signe + exposant_bin + mantisse;
         }
@@ -429,7 +449,7 @@
           result = -result;
         }
 
-        converter.displayResult(n_bits, result, signe, exponent, mantisse);
+        converter.displayResult("table_results",n_bits, result, signe, exponent, mantisse);
 
         var number_dec = document.getElementById("number_dec");
         number_dec.value = result;
@@ -498,6 +518,13 @@
     var operation_form = document.getElementById("operation-form");
     operation_form.onsubmit = function(event) {
       event.preventDefault();
+      var elements = operation_form.elements;
+      var res = converter.add_floating_bin(
+        {value: elements.bin_exp_1.toString() + elements.bin_mantissa_1.value.toString(),sign : elements.bin_sign_1.value.toString(),exp: elements.bin_exp_1.value.toString(),mantiss:elements.bin_mantissa_1.value.toString()},
+        {value: elements.bin_exp_2.toString() + elements.bin_mantissa_2.value.toString(),sign : elements.bin_sign_2.value.toString(),exp: elements.bin_exp_2.value.toString(),mantiss:elements.bin_mantissa_2.value.toString()}
+      );
+      converter.displayResult("table_results_operation",32,res.sign + res.exp + res.mantissa,res.sign,res.exp,res.mantissa);
+      //function(table,n_bits, value, signe, exponent, mantisse)
     }
   </script>
 </body>
