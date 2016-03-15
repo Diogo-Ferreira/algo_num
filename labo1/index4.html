@@ -74,7 +74,7 @@
         Nombre 1
         <p>
           <select id="allNumber_n1" onchange="onChangeValue(this, 1);">
-            <option disabled selected> -- list nombres -- </option>
+            <option disabled selected>-- choix nombre --</option>
           </select>
           <input type="number" min="0" max="1" value="0" pattern="[0-1]*" id="bin_sign_1" name="bin_sign_1" required="true" placeholder="signe" />
           <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" id="bin_exp_1" name="bin_exp_1" required="true" placeholder="exposant" />
@@ -87,7 +87,7 @@
         Nombre 2
         <p>
           <select id="allNumber_n2" onchange="onChangeValue(this, 2);">
-            <option disabled selected> -- liste nombres -- </option>
+            <option disabled selected>-- choix nombre --</option>
           </select>
           <input type="number" min="0" max="1" value="0" pattern="[0-1]*" id="bin_sign_2" name="bin_sign_2" required="true" placeholder="signe" />
           <input type="text" minlength="8" maxlength="8" pattern="[0-1]*" id="bin_exp_2" name="bin_exp_2" required="true" placeholder="exposant" />
@@ -110,26 +110,66 @@
   </form>
   <br/>
   <button onclick="removeTable(table_results_operation);">Effacer</button>
+  <hr />
+  <h1>Rapport</h1>
+  <div>
+    <h2>Introduction</h2>
+    Ce laboratoire a été réalisé dans le cadre du cours d’algorithmes numériques. Ce projet porte sur le codage des nombres. Il a été demandé de pouvoir convertir des nombres flottants, positif ou négatif, en binaire et inversement. De plus, l’opération de l’addition a été ajoutée. Ce laboratoire a été réalisé en HTML5 et en javascript.
+    <h2>Méthode de développement</h2>
+    </h3>Conversion décimal-binaire</h3>
+    Pour commencer, nous avons travaillé avec un codage sur 32 bits. Dans ce cas, la mantisse vaut 23 bits, l’exposant 8 bits et le signe 1 bit. Plusieurs étapes sont nécessaires afin de convertir notre nombre. Premièrement, il faut déterminer le bit de signe. Ensuite, on doit convertir la partie décimale en binaire, puis la fraction en binaire. Finalement, il ne reste plus qu’à calculer l’exposant et la mantisse.
+    <h3>Déterminer le bit de signe</h3>
+    Le bit de signe vaut 0 si le nombre est positif. Il vaudra 1 dans le cas où le nombre est négatif.
+    <h3>Convertir la partie décimale en binaire</h3>
+    La partie décimale est la partie du nombre avant la virgule. Il suffira de convertir cette partie en binaire grâce à ce qui a déjà été fait au laboratoire précédent.
+    <h3>Convertir la fraction en binaire</h3>
+    La fraction est la partie du nombre qui se trouve après la virgule. Il font donc convertir cette partie en binaire. La conversion se fait normalement, sauf qu’il faut utiliser des puissances de 2 négatives. Dans certains cas, il sera impossible d’approximer exactement la valeur de la fraction avec des puissances de 2. On pourra descendre jusqu’à la vingt-troisième puissance de 2, 23 correspondant à la taille de la mantisse.
+    <h3>Calcul de l’exposant</h3>
+    Il faut maintenant normaliser le nombre pour qu’il corresponde à la norme IEE-754. Il va donc falloir décaler la virgule de notre nombre binaire composé de la partie décimale et de la fraction. On va décaler la virgule vers la gauche jusqu’au dernier 1 qui correspond au bit caché, si le nombre décimal est plus grand que 1. S’il est plus petit, il faudra décaler vers la droite jusqu’au premier bit à 1.
+    Suivant le nombre de positions décalées avec la virgule, on va obtenir l’exposant. C’est-à-dire la puissance de 2 correspondante. Il faudra ensuite convertir notre exposant en binaire avec le décalage de 127. La partie qui se trouve à droite de la virgule, si on l’a décalée contre la gauche, est une partie de la mantisse.
+    <h3>Calcul de la mantisse</h3>
+    Toutes les étapes du calcul sont faites. Il suffit juste d’écrire la mantisse pour qu’elle ait une taille de 23 bits. Il va falloir rajouter des 0 si elle n’est pas assez grande. Si elle est trop grande, il va falloir la couper et garder que les bits les plus significatifs.
+    <h2>Conversion binaire-décimal</h2>
+    On va commencer par regarder la mantisse. On va la convertir en nombre réel. Pour cela, on va multiplier chaque puissance de 2 qui la compose par un 1 ou un 0 suivant sa valeur, puis additionner toutes les puissances. On obtiendra ainsi un réel qu’il faudra diviser par 2 puissance 23. Ensuite on va regarder l’exposant. Il suffit de le convertir en décimal puis d’y supprimer le décalage de 127. Alors, il suffit de multiplier la mantisse par 2 puissance l’exposant. Finalement, il faut regarder le bit de signe pour savoir si le nombre trouvé est positif ou négatif.
+    <h2>Addition</h2>
+    Plusieurs tests ont été réalisés pour coder l’addition correctement. Notamment sur le signe des deux nombres à additionner et sur leurs exposants.
+    Premièrement, il faut tester la valeur des exposants. Si elle est égale, il faudra tester les signes. Si elle n’est pas égale, il va falloir augmenter l’exposant le plus petit afin qu’il ait la même taille que le plus grand. Ensuite il faut tester le signe. L’augmentation de l’exposant le plus petit entraîne une perte des bits les moins significatifs car des 0 sont rajoutés sur la gauche de la mantisse.
+    Deuxièmement, il faut tester le signe. Si les deux signes sont positifs, il suffit de faire une addition simple des deux mantisses. Le signe du résultat sera lui aussi positif. Si les deux signes sont négatifs, là encore, il suffit d’additionner simplement. Mais dans ce cas le signe du résultat sera négatif. Si les signes sont positif puis négatif, comme dans 8-5, il faudra effectuer une simple soustraction. Cependant, il va falloir tester lequel des deux nombres a une mantisse plus grande que l’autre. Si le nombre positif a la mantisse la plus grande, alors le résultat sera positif, sinon il sera négatif. Finalement, si les signes sont négatif puis positif, comme dans -5+8, on va inverser les deux mantisses puis faire une simple soustraction. Là encore, il faudra tester quelle mantisse est la plus grande (valeur) afin de déterminer le signe du résultat. Si l’addition ou la soustraction des deux mantisses donne un nombre binaire de plus de 23 bits, les derniers bits seront perdus et le nombre de bits perdu sera additionné à l’exposant final.[a]
+    <h2>Conclusion</h2>
+    Le programme fonctionne correctement dans les deux sens. C’est-à-dire la conversion flottant à binaire ainsi que binaire à flottant. On peut cependant remarquer des erreurs d’arrondis qui sont sans doute dues à une perte des bits les moins significatifs. Il est de plus possible de choisir sur combien de bits la conversion s’effectue. Néanmoins, seules des valeurs de puissance de 2 ont été choisies. Elles vont de 8 à 256. Les tailles de la mantisse et de l’exposant s’adaptent donc selon le choix de l’utilisateur. La partie addition, quant à elle, ne s’effectue que sur 32 bits. Cette dernière marche seulement lorsque les deux nombres à additionner sont positifs. De plus, il ne faut pas qu’ils soient trop grands ou trop petits, sinon cela ne va plus marcher. En effet, il n’est pas possible de coder tous les nombres sur 32 bits et la précisions ne sera pas toujours excellente.
+    Il serait intéressant de modifier ce laboratoire de telle sorte que l’addition fonctionne correctement et qu’elle puisse effectuer du codage autre que 32 bits.
+
+  </div>
   <script>
     //Objet principale pour les opérations, __ précéder d'un champs signifie qu'il est privé
     var converter = {
       dec2bin: function(dec, n_bits) {
-        if (n_bits >= Math.log2(dec)) {
-          var k, n;
-          var output = "";
-          var dec = parseInt(dec);
-          var n_bits = parseInt(n_bits);
-          for (var c = n_bits - 1; c >= 0; c--) {
-            k = dec >> c;
-            if (k & 1) {
-              output += "1";
-            } else {
-              output += "0";
+
+        n_bits = typeof n_bits !== 'undefined' ? n_bits : -1;
+        if(n_bits == -1 ||n_bits >= Math.log2(dec)) {
+          var decimal=parseInt(dec);
+          var bin = "";
+          if(decimal){
+            var i = 0;
+            while(decimal > 0){
+              bin +=decimal-2*parseInt(decimal/2);
+              decimal = parseInt(decimal/2);
+              i++;
+            }
+            //reverse string
+            bin = bin.split("").reverse().join("");
+          } else {
+            bin = 0;
+          }
+          //Boucle pour mettre sur le nombre de bit voulu
+          if(n_bits > 0) {
+            while(bin.length < n_bits) {
+              bin = "0"+bin;
             }
           }
-          return output;
+          return bin;
         } else {
-          alert("nombre de bits unsuffisants");
+          alert("Nombre de bits insuffisants");
           return "error";
         }
       },
@@ -159,7 +199,6 @@
         if (nb2.length == 23) nb2 = "1" + nb2;
         var newMantissa = undefined;
         var sign = undefined;
-
         //Test du signe
         if (a.sign == 0 && b.sign == 0) {
           newMantissa = this.__get_rid_last_bits(this.add_bin(nb1, nb2).substring(1));
@@ -179,7 +218,7 @@
           else sign = 0;
         }
         //Calcul l'exposant suivant les bits en trop dans la mantisse
-        var exp = this.add_bin(a.exp, this.dec2bin(newMantissa.overbits, Math.log2(newMantissa.overbits) + 1));
+        var exp = this.add_bin(a.exp, this.dec2bin(newMantissa.overbits).toString());
         return {
           sign: sign,
           mantissa: newMantissa.mantissa,
@@ -189,16 +228,11 @@
       //Normalisation de l'exposant pour l'addition floatante
       __increase: function(toIncrease, ref) {
         var decal = parseInt(converter.bin2dec(ref.exp)) - parseInt(converter.bin2dec(toIncrease.exp));
-        /*Pour faire le shift, il faut d'abord stocker le nombre comme un nombre dans la mémoire,
-         * c'est à dire le convertir de bin -> dec et ensuite le parser en int. Sinon le décalage se
-         * fera sur une chaine de caractères et non un nombre ! Bien entendu on profitera de mettre en place,
-         * le bit fantôme au début de la chaîne.
-         */
-        toIncrease.mantiss = converter.dec2bin(
-          (
-            parseInt(converter.bin2dec("1" + toIncrease.mantiss)) >> decal).toString(),
-          Math.log2(parseInt(converter.bin2dec("1" + toIncrease.mantiss))) + 1
-        );
+        //Shift right
+         toIncrease.mantiss = "1" + toIncrease.mantiss;
+         for(var i = 0 ;i<decal ; i++) {
+           toIncrease.mantiss = "0" + toIncrease.mantiss;
+         }
         //Ici 24, pour conserver le bit fantôme pour la suite
         toIncrease.mantiss = this.__get_rid_last_bits(toIncrease.mantiss, 24).mantissa;
       },
@@ -206,7 +240,7 @@
       __get_rid_last_bits: function(mantissa, n_bits) {
         n_bits = typeof n_bits !== 'undefined' ? n_bits : 23;
         var overbitsToRemove = mantissa.length - n_bits;
-        if (overbitsToRemove === 0) {
+        if (overbitsToRemove == 0) {
           return {
             mantissa: mantissa,
             overbits: 0
@@ -231,7 +265,6 @@
           for (var i = 0; i < decal; i++)
             a = "0" + a;
         }
-
         var newB = "";
         for (var i = 0; i < b.length; i++) {
           if (b.charAt(i) == "1") newB += "0";
@@ -240,15 +273,12 @@
         b = newB;
         b = this.add_bin(b, "1");
         var sum = this.add_bin(a, b);
-
         result = sum.substring(sum.length - a.length);
         return result;
       },
       add_bin: function(a, b) {
-
         var remainder = "0",
           result = "";
-
         if (a.length < b.length) {
           var diff = b.length - a.length;
           while (diff > 0) {
@@ -262,7 +292,6 @@
             --diff;
           }
         }
-
         for (var i = a.length - 1; i >= 0; i--) {
           if (a[i] == "1" && b[i] == "1") {
             if (remainder == "1") {
@@ -316,24 +345,19 @@
       },
       displayResult: function(table, n_bits, value, sign, exponent, mantisse) {
         var table = document.getElementById(table);
-
         var newRow = table.insertRow(-1);
         var column = newRow.insertCell(0);
         column.align = "center";
         column.innerHTML = n_bits;
-
         column = newRow.insertCell(1);
         column.align = "center";
         column.innerHTML = value;
-
         column = newRow.insertCell(2);
         column.align = "center";
         column.innerHTML = sign;
-
         column = newRow.insertCell(3);
         column.align = "center";
         column.innerHTML = exponent;
-
         column = newRow.insertCell(4);
         column.align = "center";
         column.innerHTML = mantisse;
@@ -344,11 +368,9 @@
           alert("Erreur du calcul de nombre de bits de l'exposant");
           return;
         }
-
         var mantisse = "";
         var exposant_bin = "";
         var nbBitMantisse = n_bits - nbBitsExp - 1;
-
         var sign = 1;
         if (value >= 0) {
           sign = 0;
@@ -358,13 +380,11 @@
         if (valueInt != 0) {
           valueIntBin = converter.dec2bin(valueInt, parseInt(Math.log2(valueInt)) + 1);
         }
-
-
         if (value == 0) {
-          while (mantisse.length != nbBitMantisse) {
+          while (mantisse.length < nbBitMantisse) {
             mantisse += "0";
           }
-          while (exposant_bin.length != nbBitsExp) {
+          while (exposant_bin.length < nbBitsExp) {
             exposant_bin += "0";
           }
         } else if (valueIntBin != -1) {
@@ -376,7 +396,7 @@
           //Decalage à droite
           if (valueInt == 0) {
             var decalOk = false;
-            while (mantisse.length != nbBitMantisse) {
+            while (mantisse.length < nbBitMantisse) {
               fraction_tmp *= 2;
               if (fraction_tmp >= 1) {
                 if (!decalOk) {
@@ -396,7 +416,11 @@
             }
           } else { //Decalage à gauche
             power = parseInt(Math.log2(valueInt));
-            mantisse = valueIntBin.substring(1, valueIntBin.length);
+            if(valueIntBin.length > nbBitMantisse) {
+              mantisse = valueIntBin.substring(1, nbBitMantisse);
+            } else {
+              mantisse = valueIntBin.substring(1, valueIntBin.length);
+            }
             for (var i = mantisse.length; i < nbBitMantisse; i++) {
               fraction_tmp *= 2;
               if (fraction_tmp >= 1) {
@@ -425,16 +449,13 @@
         if (bitsExponent == 0) {
           return;
         }
-
         var d = Math.pow(2, bitsExponent - 1) - 1;
         var bitsSign = 1;
         var bitsMantisse = n_bits - bitsExponent - 1;
         var result = 0;
-
         var sign = value.substring(0, bitsSign);
         var exponent = value.substring(bitsSign, bitsSign + bitsExponent);
         var mantisse = value.substring(bitsSign + bitsExponent, bitsExponent + bitsMantisse + 1);
-
         if (exponent.indexOf('1') != -1 || mantisse.indexOf('1') != -1) {
           var j = 0;
           var floatMantisse = 0;
@@ -447,7 +468,6 @@
           }
           floatMantisse += Math.pow(2, bitsMantisse);
           floatMantisse /= Math.pow(2, bitsMantisse);
-
           var power = 0;
           j = 0;
           for (var i = bitsExponent - 1; i >= 0; --i) {
@@ -457,9 +477,7 @@
             }
             j++;
           }
-
           var exponentInt = Math.pow(2, power - d);
-
           result = floatMantisse * exponentInt;
           var bit = parseInt(sign);
           if (bit == 1) {
@@ -474,12 +492,10 @@
               };
       }
     };
-
     var elem = document.getElementById('allNumber_n1');
   elem.addEventListener('select', function() {
     alert('Selection changed!');
   }, false);
-
     function onChangeValue(select, id) {
       var selectedOption = select.options[select.selectedIndex];
       if(select.selectedIndex > 0) {
@@ -489,7 +505,6 @@
         document.getElementById("bin_mantissa_"+id).value=obj.mantisse;
       }
     }
-
     function addToComboBox(obj_number) {
       var list_n1 = document.getElementById("allNumber_n1");
       var list_n2 = document.getElementById("allNumber_n2");
@@ -502,7 +517,6 @@
       option.text = obj_number.value;
       list_n2.appendChild(option);
     }
-
     function checkValueEnter(value, n_bits, type) {
       if (value == "") {
         alert("Entré une valeur!");
@@ -524,31 +538,26 @@
       }
       return true;
     }
-
     function number_bin_onKeyUp(event) {
       updateLength();
       if (event.keyCode == 13) {
         convert_btof_onclick();
       }
     }
-
     function number_dec_onKeyUp(event) {
       updateLength();
       if (event.keyCode == 13) {
         convert_ftob_onclick();
       }
     }
-
     function updateLength() {
       var length = getLengthFieldBin();
       var span_length = document.getElementById("span_length");
       span_length.innerHTML = length;
     }
-
     function getLengthFieldBin() {
       return document.getElementById("number_bin").value.length;
     }
-
     function convert_ftob_onclick() {
       var n_bits = document.getElementById("n_bits").value;
       var number_dec = document.getElementById("number_dec").value;
@@ -566,7 +575,6 @@
         }
       }
     }
-
     function convert_btof_onclick() {
       var length = getLengthFieldBin();
       var n_bits = document.getElementById("n_bits").value;
@@ -578,7 +586,6 @@
         number_dec.value = result.value;
       }
     }
-
     function clearAllField() {
       document.getElementById("bin_sign_1").value="0";
       document.getElementById("bin_exp_1").value=""
@@ -589,7 +596,6 @@
       document.getElementById("number_dec").value="";
       document.getElementById("number_bin").value="";
     }
-
     function removeTable(name_table) {
       var rowCount = name_table.rows.length;
       while(--rowCount) name_table.deleteRow(rowCount); //Permet de supprimer toutes les lignes sauf la premiere
@@ -599,7 +605,6 @@
       while(list_n2.options.length > 1) list_n2.remove(list_n2.options.length-1);
       clearAllField();
     }
-
     var operation_form = document.getElementById("operation-form");
     operation_form.onsubmit = function(event) {
       event.preventDefault();
