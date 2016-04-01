@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test canvas</title>
+  </head>
+  <body>
+    <canvas id="sheet" width="800" height="800"></canvas>
+    <script>
+    var MyApp = {
+      init: function(){
+        this.canvas = document.getElementById("sheet");
+        this.ctx = this.canvas.getContext('2d');
+        this.draw();
+      },
+      draw : function(){
+        this.ctx.translate(parseInt(this.canvas.width/2),parseInt(this.canvas.height/2));
+
+        //Axes
+        this.ctx.beginPath();
+        this.ctx.moveTo(-parseInt(this.canvas.width/2),0);
+        this.ctx.lineTo(parseInt(this.canvas.width/2),0)
+        this.ctx.stroke();
+        this.ctx.moveTo(0,-parseInt(this.canvas.height/2));
+        this.ctx.lineTo(0,parseInt(this.canvas.height/2))
+        this.ctx.stroke();
+        this.ctx.closePath();
+        this.ctx.save();
+
+        this.ctx.beginPath();
+        for(var i = -parseInt(this.canvas.width/2) ; i <= parseInt(this.canvas.width/2);i++)
+        {
+          this.ctx.lineTo(i,-Math.exp(i*0.2));
+          this.ctx.moveTo(i,-Math.exp(i*0.2));
+          this.ctx.stroke();
+        }
+        this.ctx.closePath();
+      }
+    };
+    MyApp.init();
+    </script>
+  </body>
+</html>

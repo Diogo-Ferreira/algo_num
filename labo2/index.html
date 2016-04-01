@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Groupe 1 - Labo2</title>
+  </head>
+  <body>
+
+    <script>
+
+    function newtonsMethod(xk){
+      var delta = 1e-10;
+      var xkPlusOne,a,b,xdelta,xkOld;
+      var tab = new Array(10);
+      do{
+        console.log("f(x) == " + f(xk));
+        xdelta = parseFloat(xk)+parseFloat(delta);
+        a = (f(xdelta)-f(xk)) / parseFloat(delta);
+        console.log("a == " + a);
+        if( a == 0 || isNaN(a)){
+          //Pente infini --> Not good, faire quelque chose d'intéligent ^^
+          xk = xkOld;
+          break;
+        }else{
+          //b = f(xk) / (parseFloat(a) * parseFloat(xk));
+          //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
+          xkPlusOne = parseFloat(xk - f(xk) / parseFloat(a));
+          console.log("xk == " + xk + " | xk+1 == " + xkPlusOne );
+          xkOld = xk;
+          xk = xkPlusOne;
+        }
+      }while(Math.abs(xkOld - xk) > 0.000001 );
+      console.log("DONE : f(x) == " + f(xk) + " and xk == " + xk);
+    }
+    //function f(x){return parseFloat(x) / (1-Math.pow(parseFloat(x),2))};
+    //function f(x){return parseFloat(Math.exp(x) - parseFloat(0.5));}
+    //function f(x){return Math.log(x);}
+    function f(x){return Math.sin(x) - parseFloat(x/13);}
+    </script>
+  </body>
+</html>
