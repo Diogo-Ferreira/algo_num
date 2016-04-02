@@ -8,34 +8,63 @@
 
     <script>
 
-    function newtonsMethod(xk){
+    //Pour tester aller dans la console chrome et taper : newtonsMethod(0.9) par exemple
+
+    function newtonsMethod(xk,maxIterations){
+      var maxIterations = typeof maxIterations !== 'undefined' ?  maxIterations : 5;
       var delta = 1e-10;
       var xkPlusOne,a,b,xdelta,xkOld;
-      var tab = new Array(10);
+      var sequence = [];
       do{
         console.log("f(x) == " + f(xk));
         xdelta = parseFloat(xk)+parseFloat(delta);
         a = (f(xdelta)-f(xk)) / parseFloat(delta);
         console.log("a == " + a);
         if( a == 0 || isNaN(a)){
-          //Pente infini --> Not good, faire quelque chose d'intéligent ^^
+          //Pente =0 --> Not good, faire quelque chose d'intéligent ^^
           xk = xkOld;
-          break;
-        }else{
+          return {
+            xk: xk,
+            fOfx:f(xk),
+            error : "a=0"
+          };
+        }else if(xk >= -100 && xk <= 100){
           //b = f(xk) / (parseFloat(a) * parseFloat(xk));
           //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
           xkPlusOne = parseFloat(xk - f(xk) / parseFloat(a));
           console.log("xk == " + xk + " | xk+1 == " + xkPlusOne );
           xkOld = xk;
           xk = xkPlusOne;
+          if(sequence.length >= maxIterations){
+            if(sequence.indexOf(xk) == -1){
+              return {
+                xk:xk,
+                fOfx:f(xk),
+                error:"loop"
+              }
+            }else{
+              sequence.shift();
+            }
+          }
+          sequence.push(xk);
+        }else{
+          return{
+            xk:xk,
+            fOfx:f(xk),
+            error: "out of bounds"
+          };
         }
       }while(Math.abs(xkOld - xk) > 0.000001 );
       console.log("DONE : f(x) == " + f(xk) + " and xk == " + xk);
+      return {
+        xk:xk,
+        fOfx:f(xk)
+      };
     }
-    //function f(x){return parseFloat(x) / (1-Math.pow(parseFloat(x),2))};
+    function f(x){return parseFloat(x) / (1-Math.pow(parseFloat(x),2))};
     //function f(x){return parseFloat(Math.exp(x) - parseFloat(0.5));}
     //function f(x){return Math.log(x);}
-    function f(x){return Math.sin(x) - parseFloat(x/13);}
+    //function f(x){return Math.sin(x) - parseFloat(x/13);}
     </script>
   </body>
 </html>
