@@ -29,12 +29,19 @@
             error : "a=0"
           };
         }else if(xk >= -100 && xk <= 100){
-          //b = f(xk) / (parseFloat(a) * parseFloat(xk));
+          b = f(xk) / (parseFloat(a) * parseFloat(xk));
+
+          //Ici dessiner le point xk, la droite qui part de xk à f(xk), puis la droite tangeante au point xk --> y = ax + b
+
           //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
           xkPlusOne = parseFloat(xk - f(xk) / parseFloat(a));
           console.log("xk == " + xk + " | xk+1 == " + xkPlusOne );
           xkOld = xk;
           xk = xkPlusOne;
+
+          //ICI : Dessiner le point xkPlusOne
+
+
           if(sequence.length >= maxIterations){
             if(sequence.indexOf(xk) == -1){
               return {
