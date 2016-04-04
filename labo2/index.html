@@ -219,14 +219,16 @@
         this.transformContext();
 
         context.beginPath();
+
+        context.strokeStyle = color;
+        context.fillStyle = color;
         context.moveTo(point.x, point.y);
 
         context.lineTo(point.x+0.01, point.y+0.01);
-
+        //context.arc(point.x,point.y,0.000001,0,2*Math.PI);
         context.restore();
         context.lineJoin = 'round';
         context.lineWidth = thickness;
-        context.strokeStyle = color;
         context.stroke();
         context.restore();
       };
@@ -266,7 +268,7 @@
         maxY: 1.5,
         unitsPerTick: 1
       });
-      myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "green", 2);
+      myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "blue", 2);
 
       //Start/Stop animation
       function start_stop_click(xInit, maxIter) {
@@ -275,7 +277,7 @@
         if(runAnimation) {
           button.innerHTML = "Stop";
           myGraph.deleteGraph();
-          myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "green", 2);
+          myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "blue", 2);
           var result = newtonsMethod(xInit, maxIter);
           if(result.hasOwnProperty("error")){
             var out;
@@ -295,6 +297,7 @@
             }
             alert(out);
           }
+          myGraph.drawEquation(function(x){return result.xk;}, {min:-100,max:100}, true, "red", 1);
         } else {
           button.innerHTML = "Start";
         }
@@ -402,7 +405,8 @@
         var delta = 1e-10;
         var xkPlusOne,a,b,xdelta,xkOld;
         var sequence = [];
-        myGraph.drawPoint({x:xk,y:0}, 'red', 1);
+        var start = Date.now();
+        myGraph.drawEquation(function(x){return xk;},newtonXkLineRange(selectedEquation(xk)), true, "violet", 1);
         do{
           console.log("f(x) == " + selectedEquation(xk));
           xdelta = parseFloat(xk)+parseFloat(delta);
@@ -419,21 +423,14 @@
             };
           }else if(xk >= -100 && xk <= 100){
             b = selectedEquation(xk) - parseFloat(a) * parseFloat(xk);
-            var yXk = selectedEquation(xk);
-            var equ = function() {return xk;};
-            var range;
-            if(yXk >= 0) {
-              range = {min:0, max:yXk};
-            } else {
-              range = {min:yXk, max:0};
-            }
-            myGraph.drawEquation(equ, range, true, "green", 2);
+
+
           /*  var date = new Date();
             var time = date.getTime();
             animate(time, equ, true, "red", runAnimation, canvas, context);*/
 
             equ = function(x) {return a*x+b; };
-            myGraph.drawEquation(equ, {min:myGraph.minX, max:myGraph.maxX}, false, "grey", 2);
+            myGraph.drawEquation(equ, {min:myGraph.minX, max:myGraph.maxX}, false, "grey", 0.5);
           /*  var date = new Date();
             var time = date.getTime();
             animate(time, equ, false, "red", runAnimation, canvas, context);*/
@@ -444,8 +441,9 @@
             xkOld = xk;
             xk = xkPlusOne;
             //ICI : Dessiner le point xkPlusOne
-            myGraph.drawPoint({x:xkPlusOne,y:0}, "blue", 10);
-
+            //myGraph.drawPoint({x:xkPlusOne,y:0}, "blue", 10);
+            var yXk = selectedEquation(xk);
+            myGraph.drawEquation(function(x){return xk;}, newtonXkLineRange(yXk), true, "green", 1);
             if(sequence.length >= maxIterations){
               if(sequence.indexOf(xk) == -1){
                 return {
@@ -471,6 +469,16 @@
           xk:xk,
           fOfx:selectedEquation(xk)
         };
+      }
+
+      function newtonXkLineRange(yXk){
+        var range;
+        if(yXk >= 0) {
+          range = {min:0, max:yXk};
+        } else {
+          range = {min:yXk, max:0};
+        }
+        return range;
       }
 
       var form = document.getElementById("form");
