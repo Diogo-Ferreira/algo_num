@@ -1,77 +1,469 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Groupe 1 - Labo2</title>
+    <title>Labo 2 - Groupe 1</title>
   </head>
   <body>
-
+    <h1>Résolution d'équation</h1>
+    <form id="form" method="POST">
+      <table id="table_config">
+        <tr>
+          <td>
+            <label>Choix de la fonction : </label>
+          </td>
+          <td>
+            <select id="select_equ" onchange="onChangeValue(this);">
+              <option> sin(x) - x/13 </option>
+              <option> x / (1 - x^2) </option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label>x de départ : </label>
+          </td>
+          <td>
+            <input name="xk" id="id_xk" type="number" step="0.01" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label>Nombre d'itération max :</label>
+          </td>
+          <td>
+            <input name="max_iter" id="id_max_iter" type="number" value="5" step="1" />
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="right"><input type="submit" name="btn_start_stop" id="btn_start_stop" value="Start" />
+        </tr>
+      </table>
+    </form>
+    <br/>
+    <br/>
+    <br/>
+    <canvas id="myCanvas" width="900" height="650"></canvas>
     <script>
 
-    //Pour tester aller dans la console chrome et taper : newtonsMethod(0.9) par exemple
+      function Graph(config) {
+        // user defined properties
+        this.canvas = document.getElementById(config.canvasId);
+        this.minX = config.minX;
+        this.minY = config.minY;
+        this.maxX = config.maxX;
+        this.maxY = config.maxY;
+        this.unitsPerTick = config.unitsPerTick;
 
-    function newtonsMethod(xk,maxIterations){
-      var maxIterations = typeof maxIterations !== 'undefined' ?  maxIterations : 5;
-      var delta = 1e-10;
-      var xkPlusOne,a,b,xdelta,xkOld;
-      var sequence = [];
-      do{
-        console.log("f(x) == " + f(xk));
-        xdelta = parseFloat(xk)+parseFloat(delta);
-        a = (f(xdelta)-f(xk)) / parseFloat(delta);
-        console.log("a == " + a);
-        if( a == 0 || isNaN(a)){
-          //Pente =0 --> Not good, faire quelque chose d'intéligent ^^
-          xk = xkOld;
-          return {
-            xk: xk,
-            fOfx:f(xk),
-            error : "a=0"
-          };
-        }else if(xk >= -100 && xk <= 100){
-          b = f(xk) / (parseFloat(a) * parseFloat(xk));
+        // constants
+        this.axisColor = '#aaa';
+        this.font = '8pt Calibri';
+        this.tickSize = 20;
 
-          //Ici dessiner le point xk, la droite qui part de xk à f(xk), puis la droite tangeante au point xk --> y = ax + b
+        // relationships
+        this.context = this.canvas.getContext('2d');
+        this.rangeX = this.maxX - this.minX;
+        this.rangeY = this.maxY - this.minY;
+        this.unitX = this.canvas.width / this.rangeX;
+        this.unitY = this.canvas.height / this.rangeY;
+        this.centerY = Math.round(Math.abs(this.minY / this.rangeY) * this.canvas.height);
+        this.centerX = Math.round(Math.abs(this.minX / this.rangeX) * this.canvas.width);
+        this.iteration = (this.maxX - this.minX) / 1000;
+        this.scaleX = this.canvas.width / this.rangeX;
+        this.scaleY = this.canvas.height / this.rangeY;
 
-          //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
-          xkPlusOne = parseFloat(xk - f(xk) / parseFloat(a));
-          console.log("xk == " + xk + " | xk+1 == " + xkPlusOne );
-          xkOld = xk;
-          xk = xkPlusOne;
+        // draw x and y axis
+        this.drawXAxis();
+        this.drawYAxis();
+      }
 
-          //ICI : Dessiner le point xkPlusOne
+      Graph.prototype.changeAxis = function (axisX, axisY) {
+        this.minX = axisX.min;
+        this.maxX = axisX.max;
+        this.minY = axisY.min;
+        this.maxY = axisY.max;
 
+        this.rangeX = this.maxX - this.minX;
+        this.rangeY = this.maxY - this.minY;
+        this.unitX = this.canvas.width / this.rangeX;
+        this.unitY = this.canvas.height / this.rangeY;
+        this.centerY = Math.round(Math.abs(this.minY / this.rangeY) * this.canvas.height);
+        this.centerX = Math.round(Math.abs(this.minX / this.rangeX) * this.canvas.width);
+        this.iteration = (this.maxX - this.minX) / 1000;
+        this.scaleX = this.canvas.width / this.rangeX;
+        this.scaleY = this.canvas.height / this.rangeY;
+      }
 
-          if(sequence.length >= maxIterations){
-            if(sequence.indexOf(xk) == -1){
-              return {
-                xk:xk,
-                fOfx:f(xk),
-                error:"loop"
-              }
-            }else{
-              sequence.shift();
-            }
-          }
-          sequence.push(xk);
-        }else{
-          return{
-            xk:xk,
-            fOfx:f(xk),
-            error: "out of bounds"
-          };
+      Graph.prototype.drawXAxis = function() {
+        var context = this.context;
+        context.save();
+        context.beginPath();
+        context.moveTo(0, this.centerY);
+        context.lineTo(this.canvas.width, this.centerY);
+        context.strokeStyle = this.axisColor;
+        context.lineWidth = 2;
+        context.stroke();
+
+        // draw tick marks
+        var xPosIncrement = this.unitsPerTick * this.unitX;
+        var xPos, unit;
+        context.font = this.font;
+        context.textAlign = 'center';
+        context.textBaseline = 'top';
+
+        // draw left tick marks
+        xPos = this.centerX - xPosIncrement;
+        unit = -1 * this.unitsPerTick;
+        while(xPos > 0) {
+          context.moveTo(xPos, this.centerY - this.tickSize / 2);
+          context.lineTo(xPos, this.centerY + this.tickSize / 2);
+          context.stroke();
+          context.fillText(unit, xPos, this.centerY + this.tickSize / 2 + 3);
+          unit -= this.unitsPerTick;
+          xPos = Math.round(xPos - xPosIncrement);
         }
-      }while(Math.abs(xkOld - xk) > 0.000001 );
-      console.log("DONE : f(x) == " + f(xk) + " and xk == " + xk);
-      return {
-        xk:xk,
-        fOfx:f(xk)
+
+        // draw right tick marks
+        xPos = this.centerX + xPosIncrement;
+        unit = this.unitsPerTick;
+        while(xPos < this.canvas.width) {
+          context.moveTo(xPos, this.centerY - this.tickSize / 2);
+          context.lineTo(xPos, this.centerY + this.tickSize / 2);
+          context.stroke();
+          context.fillText(unit, xPos, this.centerY + this.tickSize / 2 + 3);
+          unit += this.unitsPerTick;
+          xPos = Math.round(xPos + xPosIncrement);
+        }
+        context.restore();
       };
-    }
-    function f(x){return parseFloat(x) / (1-Math.pow(parseFloat(x),2))};
-    //function f(x){return parseFloat(Math.exp(x) - parseFloat(0.5));}
-    //function f(x){return Math.log(x);}
-    //function f(x){return Math.sin(x) - parseFloat(x/13);}
+
+      Graph.prototype.drawYAxis = function() {
+        var context = this.context;
+        context.save();
+        context.beginPath();
+        context.moveTo(this.centerX, 0);
+        context.lineTo(this.centerX, this.canvas.height);
+        context.strokeStyle = this.axisColor;
+        context.lineWidth = 2;
+        context.stroke();
+
+        // draw tick marks
+        var yPosIncrement = this.unitsPerTick * this.unitY;
+        var yPos, unit;
+        context.font = this.font;
+        context.textAlign = 'right';
+        context.textBaseline = 'middle';
+
+        // draw top tick marks
+        yPos = this.centerY - yPosIncrement;
+        unit = this.unitsPerTick;
+        while(yPos > 0) {
+          context.moveTo(this.centerX - this.tickSize / 2, yPos);
+          context.lineTo(this.centerX + this.tickSize / 2, yPos);
+          context.stroke();
+          context.fillText(unit, this.centerX - this.tickSize / 2 - 3, yPos);
+          unit += this.unitsPerTick;
+          yPos = Math.round(yPos - yPosIncrement);
+        }
+
+        // draw bottom tick marks
+        yPos = this.centerY + yPosIncrement;
+        unit = -1 * this.unitsPerTick;
+        while(yPos < this.canvas.height) {
+          context.moveTo(this.centerX - this.tickSize / 2, yPos);
+          context.lineTo(this.centerX + this.tickSize / 2, yPos);
+          context.stroke();
+          context.fillText(unit, this.centerX - this.tickSize / 2 - 3, yPos);
+          unit -= this.unitsPerTick;
+          yPos = Math.round(yPos + yPosIncrement);
+        }
+        context.restore();
+      };
+
+      Graph.prototype.drawEquation = function(equation, range, isRightX, color, thickness) {
+
+        var context = this.context;
+        context.save();
+        context.save();
+        this.transformContext();
+
+        context.beginPath();
+      //  context.moveTo(this.minX, equation(this.minX));
+
+        if(isRightX) {
+          context.moveTo(equation(), range.min);
+          for(var y = range.min + this.iteration; y <= range.max; y += this.iteration) {
+              context.lineTo(equation(), y);
+          }
+        } else {
+          context.moveTo(range.min, equation(range.min));
+          for(var x = range.min + this.iteration; x <= range.max; x += this.iteration) {
+              context.lineTo(x, equation(x));
+          }
+        }
+
+
+        context.restore();
+        context.lineJoin = 'round';
+        context.lineWidth = thickness;
+        context.strokeStyle = color;
+        context.stroke();
+        context.restore();
+      };
+
+      Graph.prototype.drawPoint = function(point, color, thickness) {
+
+        var context = this.context;
+        context.save();
+        context.save();
+        this.transformContext();
+
+        context.beginPath();
+        context.moveTo(point.x, point.y);
+
+        context.lineTo(point.x+0.01, point.y+0.01);
+
+        context.restore();
+        context.lineJoin = 'round';
+        context.lineWidth = thickness;
+        context.strokeStyle = color;
+        context.stroke();
+        context.restore();
+      };
+
+      Graph.prototype.deleteGraph = function () {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawXAxis();
+        this.drawYAxis();
+      };
+
+      Graph.prototype.transformContext = function() {
+        var context = this.context;
+
+        // move context to center of canvas
+        this.context.translate(this.centerX, this.centerY);
+
+        /*
+         * stretch grid to fit the canvas window, and
+         * invert the y scale so that that increments
+         * as you move upwards
+         */
+        context.scale(this.scaleX, -this.scaleY);
+      };
+
+      var runAnimation = false;
+      var isFinished = false;
+      var selectedEquation = function(x) {  return Math.sin(x) - x/13; }
+      var point = { x : -8,y : -1.5 };
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+
+      var myGraph = new Graph({
+        canvasId: 'myCanvas',
+        minX: -8,
+        minY: -1.5,
+        maxX: 8,
+        maxY: 1.5,
+        unitsPerTick: 0.5
+      });
+      myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "green", 2);
+
+      //Start/Stop animation
+      function start_stop_click(xInit, maxIter) {
+        runAnimation = !runAnimation;
+        var button = document.getElementById("btn_start_stop");
+        if(runAnimation) {
+          button.innerHTML = "Stop";
+          myGraph.deleteGraph();
+          myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "green", 2);
+          newtonsMethod(xInit, maxIter);
+        } else {
+          button.innerHTML = "Start";
+        }
+      }
+
+      //Equation change
+      function onChangeValue(select) {
+          var selectedIndex = select.selectedIndex;
+
+          switch(selectedIndex) {
+            case 0:
+              selectedEquation = function(x) { return Math.sin(x)-(x/13); }
+              myGraph.changeAxis({min:-8,max:8},{min:-1.5,max:1.5});
+              myGraph.minX = -8;
+              myGraph.maxX = 8;
+              myGraph.minY = -1.5;
+              myGraph.maxY = 1.5;
+              point.x=-8;
+              point.y=-1.5;
+            break;
+            case 1:
+              selectedEquation = function(x) { return x/(1-Math.pow(x, 2)); }
+              myGraph.changeAxis({min:-8,max:8},{min:-5.5,max:5.5});
+              myGraph.minX = -8;
+              myGraph.maxX = 8;
+              myGraph.minY = -5.5;
+              myGraph.maxY = 5.5;
+              point.x=-8;
+              point.y=-5.5;
+            break;
+            case 2:
+              selectedEquation = function(x) { return x; }
+            break;
+          }
+          myGraph.deleteGraph();
+          myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "green", 2);
+          var button = document.getElementById("btn_start_stop");
+          button.innerHTML = "Start";
+          runAnimation = false;
+      }
+
+      window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1);
+        };
+      })();
+
+      function animate(lastTime, equation, isRightX, color, canvas, context) {
+        if(runAnimation) {
+          // update
+          var time = (new Date()).getTime();
+          var timeDiff = time - lastTime;
+
+          if(isRightX) {
+            myGraph.drawPoint({x:equation(),y:point.y}, color, 2);
+
+            if(point.y >= 0) {
+              for(var y = point.y; y <= point.y+0.1 ; y += 0.0001) {
+                myGraph.drawPoint({x:equation(),y:y}, color, 2);
+              }
+            } else {
+              for(var y = point.y; y >= point.y-0.1 ; y -= 0.0001) {
+                myGraph.drawPoint({x:equation(),y:y}, color, 2);
+              }
+            }
+
+            point.y += 0.1;
+          } else {
+
+            var posX=point.x;
+            var posY=equation(point.x);
+
+            var result;
+            if(posX >= 0) {
+              for(var x = posX; x <= posX+0.1 ; x += 0.0001) {
+                myGraph.drawPoint({x:x,y:equation(x)}, color, 2);
+              }
+            } else {
+              for(var x = posX; x >= posX-0.1 ; x -= 0.0001) {
+                myGraph.drawPoint({x:x,y:equation(x)}, color, 2);
+              }
+            }
+
+            point.x += 0.1;
+
+          }
+
+          if(posX > 8) {
+            var button = document.getElementById("btn_start_stop");
+            button.innerHTML = "Start";
+            runAnimation = false;
+            point = { x : -8,y : 0 };
+            isFinished = true;
+          }
+          // request new frame
+          requestAnimFrame(function() {
+            animate(time, equation, isRightX, color, canvas, context);
+          });
+        }
+      }
+
+      function newtonsMethod(xk,maxIterations){
+        var maxIterations = typeof maxIterations !== 'undefined' ?  maxIterations : 5;
+        var delta = 1e-10;
+        var xkPlusOne,a,b,xdelta,xkOld;
+        var sequence = [];
+        do{
+          console.log("f(x) == " + selectedEquation(xk));
+          xdelta = parseFloat(xk)+parseFloat(delta);
+          a = (selectedEquation(xdelta)-selectedEquation(xk)) / parseFloat(delta);
+          console.log("a == " + a);
+          if( a == 0 || isNaN(a)){
+            //Pente =0 --> Not good, faire quelque chose d'intéligent ^^
+            xk = xkOld;
+            return {
+              xk: xk,
+              fOfx:selectedEquation(xk),
+              error : "a=0"
+            };
+          }else if(xk >= -100 && xk <= 100){
+            b = selectedEquation(xk) / (parseFloat(a) * parseFloat(xk));
+            //Ici dessiner le point xk, la droite qui part de xk à f(xk), puis la droite tangeante au point xk --> y = ax + b
+            myGraph.drawPoint({x:xk,y:0}, 'red', 3);
+
+            var yXk = selectedEquation(xk);
+            var equ = function() {return xk;};
+            var range;
+            if(yXk >= 0) {
+              range = {min:0, max:yXk};
+            } else {
+              range = {min:yXk, max:0};
+            }
+            myGraph.drawEquation(equ, range, true, "red", 2);
+          /*  var date = new Date();
+            var time = date.getTime();
+            animate(time, equ, true, "red", runAnimation, canvas, context);*/
+
+            equ = function(x) {return a*x+b; };
+            myGraph.drawEquation(equ, {min:myGraph.minX, max:myGraph.maxX}, false, "red", 2);
+          /*  var date = new Date();
+            var time = date.getTime();
+            animate(time, equ, false, "red", runAnimation, canvas, context);*/
+
+            //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
+            xkPlusOne = parseFloat(xk - selectedEquation(xk) / parseFloat(a));
+            console.log("xk == " + xk + " | xk+1 == " + xkPlusOne );
+            xkOld = xk;
+            xk = xkPlusOne;
+            //ICI : Dessiner le point xkPlusOne
+            myGraph.drawPoint({x:xkPlusOne,y:0}, "blue", 3);
+
+            if(sequence.length >= maxIterations){
+              if(sequence.indexOf(xk) == -1){
+                return {
+                  xk:xk,
+                  fOfx:selectedEquation(xk),
+                  error:"loop"
+                }
+              }else{
+                sequence.shift();
+              }
+            }
+            sequence.push(xk);
+          }else{
+            return{
+              xk:xk,
+              fOfx:selectedEquation(xk),
+              error: "out of bounds"
+            };
+          }
+        }while(Math.abs(xkOld - xk) > 0.000001 );
+        console.log("DONE : f(x) == " + selectedEquation(xk) + " and xk == " + xk);
+        return {
+          xk:xk,
+          fOfx:selectedEquation(xk)
+        };
+      }
+
+      var form = document.getElementById("form");
+
+      form.onsubmit = function(event) {
+        event.preventDefault();
+        var xInit = document.getElementById("id_xk").value;
+        var maxIter = document.getElementById("id_max_iter").value;
+        start_stop_click(xInit, maxIter);
+      }
     </script>
   </body>
 </html>
