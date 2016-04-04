@@ -43,7 +43,7 @@
     <br/>
     <br/>
     <br/>
-    <canvas id="myCanvas" width="900" height="650"></canvas>
+    <canvas id="myCanvas" width="1280" height="720"></canvas>
     <script>
 
       function Graph(config) {
@@ -58,7 +58,7 @@
         // constants
         this.axisColor = '#aaa';
         this.font = '8pt Calibri';
-        this.tickSize = 20;
+        this.tickSize = 8;
 
         // relationships
         this.context = this.canvas.getContext('2d');
@@ -260,11 +260,11 @@
 
       var myGraph = new Graph({
         canvasId: 'myCanvas',
-        minX: -8,
+        minX: -10,
         minY: -1.5,
-        maxX: 8,
+        maxX: 10,
         maxY: 1.5,
-        unitsPerTick: 0.5
+        unitsPerTick: 1
       });
       myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "green", 2);
 
@@ -276,7 +276,25 @@
           button.innerHTML = "Stop";
           myGraph.deleteGraph();
           myGraph.drawEquation(selectedEquation, {min:myGraph.minX, max:myGraph.maxX}, false, "green", 2);
-          newtonsMethod(xInit, maxIter);
+          var result = newtonsMethod(xInit, maxIter);
+          if(result.hasOwnProperty("error")){
+            var out;
+            switch(result.error){
+              case "loop":
+                out = "Boucle infinie, veuillez rédéfinir xk";
+              break;
+              case "out of bounds":
+                out = "Hors domaine, veuillez rédéfinir xk";
+              break;
+              case "a=0":
+                out = "pente = 0, veuilleu rédéfinir xk";
+              break;
+              case "a=inf":
+                out = "pente infini, veuilleu rédéfinir xk";
+              break;
+            }
+            alert(out);
+          }
         } else {
           button.innerHTML = "Start";
         }
@@ -289,9 +307,9 @@
           switch(selectedIndex) {
             case 0:
               selectedEquation = function(x) { return Math.sin(x)-(x/13); }
-              myGraph.changeAxis({min:-8,max:8},{min:-1.5,max:1.5});
-              myGraph.minX = -8;
-              myGraph.maxX = 8;
+              myGraph.changeAxis({min:-10,max:10},{min:-1.5,max:1.5});
+              myGraph.minX = -10;
+              myGraph.maxX = 10;
               myGraph.minY = -1.5;
               myGraph.maxY = 1.5;
               point.x=-8;
@@ -299,9 +317,9 @@
             break;
             case 1:
               selectedEquation = function(x) { return x/(1-Math.pow(x, 2)); }
-              myGraph.changeAxis({min:-8,max:8},{min:-5.5,max:5.5});
-              myGraph.minX = -8;
-              myGraph.maxX = 8;
+              myGraph.changeAxis({min:-8.5,max:8.5},{min:-5.5,max:5.5});
+              myGraph.minX = -10;
+              myGraph.maxX = 10;
               myGraph.minY = -5.5;
               myGraph.maxY = 5.5;
               point.x=-8;
@@ -384,24 +402,23 @@
         var delta = 1e-10;
         var xkPlusOne,a,b,xdelta,xkOld;
         var sequence = [];
+        myGraph.drawPoint({x:xk,y:0}, 'red', 1);
         do{
           console.log("f(x) == " + selectedEquation(xk));
           xdelta = parseFloat(xk)+parseFloat(delta);
           a = (selectedEquation(xdelta)-selectedEquation(xk)) / parseFloat(delta);
           console.log("a == " + a);
-          if( a == 0 || isNaN(a)){
-            //Pente =0 --> Not good, faire quelque chose d'intéligent ^^
+          if( Math.abs(a) < 0.001 || isNaN(a) || Math.abs(a) ==Infinity){
+            var error = "a=0";
+            if(Math.abs(a) == Infinity) error = "a=inf";
             xk = xkOld;
             return {
               xk: xk,
               fOfx:selectedEquation(xk),
-              error : "a=0"
+              error : error
             };
           }else if(xk >= -100 && xk <= 100){
-            b = selectedEquation(xk) / (parseFloat(a) * parseFloat(xk));
-            //Ici dessiner le point xk, la droite qui part de xk à f(xk), puis la droite tangeante au point xk --> y = ax + b
-            myGraph.drawPoint({x:xk,y:0}, 'red', 3);
-
+            b = selectedEquation(xk) - parseFloat(a) * parseFloat(xk);
             var yXk = selectedEquation(xk);
             var equ = function() {return xk;};
             var range;
@@ -410,13 +427,13 @@
             } else {
               range = {min:yXk, max:0};
             }
-            myGraph.drawEquation(equ, range, true, "red", 2);
+            myGraph.drawEquation(equ, range, true, "green", 2);
           /*  var date = new Date();
             var time = date.getTime();
             animate(time, equ, true, "red", runAnimation, canvas, context);*/
 
             equ = function(x) {return a*x+b; };
-            myGraph.drawEquation(equ, {min:myGraph.minX, max:myGraph.maxX}, false, "red", 2);
+            myGraph.drawEquation(equ, {min:myGraph.minX, max:myGraph.maxX}, false, "grey", 2);
           /*  var date = new Date();
             var time = date.getTime();
             animate(time, equ, false, "red", runAnimation, canvas, context);*/
@@ -427,7 +444,7 @@
             xkOld = xk;
             xk = xkPlusOne;
             //ICI : Dessiner le point xkPlusOne
-            myGraph.drawPoint({x:xkPlusOne,y:0}, "blue", 3);
+            myGraph.drawPoint({x:xkPlusOne,y:0}, "blue", 10);
 
             if(sequence.length >= maxIterations){
               if(sequence.indexOf(xk) == -1){
