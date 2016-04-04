@@ -4,6 +4,21 @@
 <head>
   <meta charset="utf-8">
   <title>Labo 2 - Groupe 1</title>
+  <style>
+    body{font-family: calibri;font-weight: bold;}
+    .green{
+      background: green;
+      color:white;
+    }
+    .grey{
+      background: lightgrey;
+      color:white;
+    }
+    .blue{
+      background: lightblue;
+      color:white;
+    }
+  </style>
 </head>
 
 <body>
@@ -26,7 +41,7 @@
           <label>x de départ : </label>
         </td>
         <td>
-          <input name="xk" id="id_xk" type="number" step="0.01" />
+          <input name="xk" id="id_xk" type="number" step="0.01" required/>
         </td>
       </tr>
       <tr>
@@ -34,7 +49,7 @@
           <label>Nombre d'itération max :</label>
         </td>
         <td>
-          <input name="max_iter" id="id_max_iter" type="number" value="5" step="1" />
+          <input name="max_iter" id="id_max_iter" type="number" value="10" required step="1" />
         </td>
       </tr>
       <tr>
@@ -43,25 +58,24 @@
       </tr>
     </table>
   </form>
-  <div style="float:left;" id="output"></div>
+  <div style="float:right;" id="output"></div>
   <br/>
   <br/>
   <br/>
-  <canvas style="float:right;" id="myCanvas" width="1280" height="720"></canvas>
+  <canvas style="float:left;" id="myCanvas" width="1280" height="720"></canvas>
 
   <script>
-
-    function outputArea(id){
+    function outputArea(id) {
       this.area = document.getElementById(id);
 
       this.eraseContent();
     }
 
-    outputArea.prototype.addLine = function(line){
-      this.area.innerHTML += "<p>"+line+"</p>";
+    outputArea.prototype.addLine = function(line, cls) {
+      this.area.innerHTML += "<p class=" + cls + ">" + line + "</p>";
     }
 
-    outputArea.prototype.eraseContent = function(){
+    outputArea.prototype.eraseContent = function() {
       this.area.innerHTML = "<h2>Sortie</h2>";
     }
 
@@ -286,11 +300,11 @@
 
     var myGraph = new Graph({
       canvasId: 'myCanvas',
-      minX: -10,
+      minX: -5,
       minY: -1.5,
-      maxX: 10,
+      maxX: 5,
       maxY: 1.5,
-      unitsPerTick: 1
+      unitsPerTick: 2
     });
     myGraph.drawEquation(selectedEquation, {
       min: myGraph.minX,
@@ -307,31 +321,35 @@
         myGraph.drawEquation(selectedEquation, {
           min: myGraph.minX,
           max: myGraph.maxX
-        }, false, "blue", 2);
+        }, false, "black", 2);
         var result = newtonsMethod(xInit, maxIter);
         this.out = new outputArea("output");
-        result.animation[result.animation.length-1].error = result.error;
-        result.animation.forEach(function(current,index){
+        result.animation[result.animation.length - 1].error = result.error;
+        result.animation.forEach(function(current, index) {
 
-          setTimeout(function(isLast){
+          setTimeout(function(isLast) {
             var xk = current.vars.xk;
             var a = current.vars.a;
             var b = current.vars.b;
             var func;
-            if(current.type == "bar")
-              func = function(x){return xk;};
-            else if(current.type == "line")
-              func = function(x){return a * x + b;};
+            if (current.type == "bar")
+              func = function(x) {
+                return xk;
+              };
+            else if (current.type == "line")
+              func = function(x) {
+                return a * x + b;
+              };
 
             myGraph.drawEquation(func, current.range, current.isRightX, current.color, 1);
 
-            if(current.messages != undefined){
-              current.messages.forEach(function(currentMsg){
-                this.out.addLine(currentMsg);
+            if (current.messages != undefined) {
+              current.messages.forEach(function(currentMsg) {
+                this.out.addLine(currentMsg.msg,currentMsg.color);
               });
             }
 
-            if(current.error != undefined){
+            if (current.error != undefined) {
               var out;
               switch (current.error) {
                 case "loop":
@@ -350,7 +368,7 @@
               alert(out);
             }
 
-          },index*500);
+          }, index * 500);
         });
       } else {
         button.innerHTML = "Start";
@@ -391,8 +409,8 @@
             min: -5.5,
             max: 5.5
           });
-          myGraph.minX = -10;
-          myGraph.maxX = 10;
+          myGraph.minX = -5;
+          myGraph.maxX = 5;
           myGraph.minY = -5.5;
           myGraph.maxY = 5.5;
           point.x = -8;
@@ -427,12 +445,20 @@
       var xkPlusOne, a, b, xdelta, xkOld;
       var sequence = [];
       var stepsForAnimations = [];
-      /*myGraph.drawEquation(function(x) {
-        return xk;
-      }, newtonXkLineRange(selectedEquation(xk)), true, "violet", 1);*/
-      stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:newtonXkLineRange(selectedEquation(xk)),color:"violet",isRightX:true,messages:[
-        "Premier xk = " + xk
-      ]});
+      stepsForAnimations.push({
+        vars: {
+          xk: xk,
+          a: a,
+          b: b
+        },
+        type: "bar",
+        range: newtonXkLineRange(selectedEquation(xk)),
+        color: "violet",
+        isRightX: true,
+        messages: [
+          {msg:"Premier xk = " + xk,color:"blue"}
+        ]
+      });
       do {
         console.log("f(x) == " + selectedEquation(xk));
         xdelta = parseFloat(xk) + parseFloat(delta);
@@ -446,30 +472,46 @@
             xk: xk,
             fOfx: selectedEquation(xk),
             error: error,
-            animation:stepsForAnimations
+            animation: stepsForAnimations
           };
         } else if (xk >= -100 && xk <= 100) {
           b = selectedEquation(xk) - parseFloat(a) * parseFloat(xk);
-          /*myGraph.drawEquation(function(x) {
-            return a * x + b;
-          }, {
-            min: myGraph.minX,
-            max: myGraph.maxX
-          }, false, "grey", 1);*/
-          stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"line",range:{min: -100,max: 100},color:"grey",isRightX:false,messages:[
-            "Dessin tangeante du point xk:"+xk+" a:"+a," b:"+b
-          ]});
+          stepsForAnimations.push({
+            vars: {
+              xk: xk,
+              a: a,
+              b: b
+            },
+            type: "line",
+            range: {
+              min: -100,
+              max: 100
+            },
+            color: "grey",
+            isRightX: false,
+            messages: [
+              {msg:"Dessin tangeante du point xk:" + xk + " a" + a+ " b:" + b,color:"grey"}
+            ]
+          });
           //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
           xkPlusOne = parseFloat(xk - selectedEquation(xk) / parseFloat(a));
           console.log("xk == " + xk + " | xk+1 == " + xkPlusOne);
           xkOld = xk;
           xk = xkPlusOne;
-          /*myGraph.drawEquation(function(x) {
-            return xk;
-          }, newtonXkLineRange(selectedEquation(xk)), true, "green", 1);*/
-          stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:newtonXkLineRange(selectedEquation(xk)),color:"green",isRightX:true,messages:[
-            "xk+1:"+xk
-          ]});
+          stepsForAnimations.push({
+            vars: {
+              xk: xk,
+              a: a,
+              b: b
+            },
+            type: "bar",
+            range: newtonXkLineRange(selectedEquation(xk)),
+            color: "blue",
+            isRightX: true,
+            messages: [
+              {msg:"xk+1:" + xk,color:"blue"}
+            ]
+          });
 
           if (sequence.length >= maxIterations) {
             if (sequence.indexOf(xk) == -1) {
@@ -477,7 +519,7 @@
                 xk: xk,
                 fOfx: selectedEquation(xk),
                 error: "loop",
-                animation:stepsForAnimations
+                animation: stepsForAnimations
               }
             } else {
               sequence.shift();
@@ -489,7 +531,7 @@
             xk: xk,
             fOfx: selectedEquation(xk),
             error: "out of bounds",
-            animation:stepsForAnimations
+            animation: stepsForAnimations
           };
         }
       } while (Math.abs(xkOld - xk) > 0.000001);
@@ -497,13 +539,27 @@
 
 
       console.log("DONE : f(x) == " + selectedEquation(xk) + " and xk == " + xk);
-      stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:{min:-100,max:100},color:"red",isRightX:true,messages:[
-        "Le point xk approximer final est : " + xk
-      ]});
+      stepsForAnimations.push({
+        vars: {
+          xk: xk,
+          a: a,
+          b: b
+        },
+        type: "bar",
+        range: {
+          min: -100,
+          max: 100
+        },
+        color: "green",
+        isRightX: true,
+        messages: [
+          {msg:"Le point xk approximer final est : " + xk,color:"green"}
+        ]
+      });
       return {
         xk: xk,
         fOfx: selectedEquation(xk),
-        animation:stepsForAnimations
+        animation: stepsForAnimations
       };
     }
 

@@ -4,11 +4,35 @@
 <head>
   <meta charset="utf-8">
   <title>Labo 2 - Groupe 1</title>
+  <style>
+    body{font-family: arial;font-weight: bold;}
+    .green{
+      background: green;
+      color:white;
+    }
+    .grey{
+      background: grey;
+      color:white;
+    }
+    .blue{
+      background: lightblue;
+      color:white;
+    }
+    .violet{
+      background: violet;
+      color:white;
+    }
+    .red{
+      background: red;
+      color:white;
+    }
+  </style>
 </head>
 <body onload="initialize();">
   <h1>Résolution d'équation</h1>
+  <div style="float:left;">
   <form id="form" method="POST">
-    <h3>Configuration des axes :</h3>
+    <h2>Configuration des axes :</h2>
     <table id="axis_config" cellspacing="0" cellpadding="5">
       <tr>
         <td>
@@ -47,14 +71,14 @@
         </td>
       </tr>
     </table>
-    <h3>Fonction :</h3>
+    <h2>Fonction :</h2>
     <table id="table_config">
       <tr>
         <td>
           <label>Choix de la fonction : </label>
         </td>
         <td>
-          <select id="select_equ" onchange="onChangeValue(this);">
+          <select id="select_equ" onchange="onChangeEquation(this);">
             <option> sin(x) - x/13 </option>
             <option> x / (1 - x^2) </option>
           </select>
@@ -65,38 +89,45 @@
           <label>x de départ : </label>
         </td>
         <td>
-          <input name="xk" id="id_xk" type="number" step="0.01" />
+          <input name="xk" id="id_xk" type="number" step="0.01" required/>
         </td>
       </tr>
       <tr>
         <td>
-          <label>Nombre d'itération max :</label>
+          <label>Taille tableau anti-boucle</label>
         </td>
         <td>
-          <input name="max_iter" id="id_max_iter" type="number" value="5" step="1" />
+          <input name="max_iter" id="id_max_iter" type="number" value="10" step="1" required />
         </td>
       </tr>
       <tr>
         <td colspan="2" align="right">
           <input type="submit" name="calculer" id="btn_calculer" value="Calculer" />
       </tr>
+      <tr >
+
+        <td colspan="3">
+          <div style="overflow-y: scroll; max-height:400px;" id="output"></div>
+        </td>
+      </tr>
     </table>
   </form>
-  <div style="float:left;" id="output"></div>
-  <br/>
-  <br/>
-  <br/>
-  <canvas style="float:right;" id="myCanvas" width="1280" height="720"></canvas>
+</div>
+  <canvas style="float:right;" id="myCanvas" width="1000" height="800"></canvas>
 
   <script>
-    function outputArea(id){
+    function outputArea(id) {
       this.area = document.getElementById(id);
+
       this.eraseContent();
     }
-    outputArea.prototype.addLine = function(line){
-      this.area.innerHTML += "<p>"+line+"</p>";
+
+    outputArea.prototype.addLine = function(line, cls) {
+      this.area.innerHTML += "<div class=" + cls + ">" + line + "</div>";
+      this.area.scrollTop = this.area.scrollHeight;
     }
-    outputArea.prototype.eraseContent = function(){
+
+    outputArea.prototype.eraseContent = function() {
       this.area.innerHTML = "<h2>Sortie</h2>";
     }
     function Graph(config) {
@@ -258,7 +289,8 @@
       } else {
         context.moveTo(range.min, equation(range.min));
         for (var x = range.min + this.iteration; x <= range.max; x += this.iteration) {
-          context.lineTo(x, equation(x));
+          //context.lineTo(x, equation(x));
+          context.lineTo(x.toFixed(12), equation(x.toFixed(12)));
         }
       }
       context.restore();
@@ -390,7 +422,7 @@
       myGraph.drawEquation(selectedEquation, {
         min: myGraph.minX,
         max: myGraph.maxX
-      }, false, "blue", 2);
+      }, false, "green", 2);
     }
 
     //Start/Stop animation
@@ -399,25 +431,27 @@
       myGraph.drawEquation(selectedEquation, {
         min: myGraph.minX,
         max: myGraph.maxX
-      }, false, "blue", 2);
+      }, false, "green", 2);
       var result = newtonsMethod(xInit, maxIter);
       this.out = new outputArea("output");
       result.animation[result.animation.length-1].error = result.error;
       result.animation.forEach(function(current,index){
-        setTimeout(function(isLast){
+        setTimeout(function(){
           var xk = current.vars.xk;
           var a = current.vars.a;
           var b = current.vars.b;
           var func;
-          if(current.type == "bar")
-            func = function(x){return xk;};
-          else if(current.type == "line")
-            func = function(x){return a * x + b;};
-          myGraph.drawEquation(func, current.range, current.isRightX, current.color, 1);
-          if(current.messages != undefined){
-            current.messages.forEach(function(currentMsg){
-              this.out.addLine(currentMsg);
-            });
+          if(Math.abs(selectedEquation(xk)) !== Infinity){
+            if(current.type == "bar")
+              func = function(x){return xk;};
+            else if(current.type == "line")
+              func = function(x){return a * x + b;};
+            myGraph.drawEquation(func, current.range, current.isRightX, current.color, 1);
+            if(current.messages != undefined){
+              current.messages.forEach(function(currentMsg){
+                this.out.addLine(currentMsg.msg,currentMsg.color);
+              });
+            }
           }
           if(current.error != undefined){
             var out;
@@ -451,7 +485,7 @@
         return xk;
       }, newtonXkLineRange(selectedEquation(xk)), true, "violet", 1);*/
       stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:newtonXkLineRange(selectedEquation(xk)),color:"violet",isRightX:true,messages:[
-        "Premier xk = " + xk
+        {msg:"Premier xk = " + parseFloat(xk).toFixed(4),color:"violet"}
       ]});
       do {
         console.log("f(x) == " + selectedEquation(xk));
@@ -470,14 +504,8 @@
           };
         } else if (xk >= -100 && xk <= 100) {
           b = selectedEquation(xk) - parseFloat(a) * parseFloat(xk);
-          /*myGraph.drawEquation(function(x) {
-            return a * x + b;
-          }, {
-            min: myGraph.minX,
-            max: myGraph.maxX
-          }, false, "grey", 1);*/
           stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"line",range:{min: -100,max: 100},color:"grey",isRightX:false,messages:[
-            "Dessin tangeante du point xk:"+xk+" a:"+a," b:"+b
+            {msg:"Dessin tangeante du point xk: " + parseFloat(xk).toFixed(4) + " a: " + parseFloat(a).toFixed(4)+ " b: " + parseFloat(b).toFixed(4),color:"grey"}
           ]});
           //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
           xkPlusOne = parseFloat(xk - selectedEquation(xk) / parseFloat(a));
@@ -488,7 +516,7 @@
             return xk;
           }, newtonXkLineRange(selectedEquation(xk)), true, "green", 1);*/
           stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:newtonXkLineRange(selectedEquation(xk)),color:"green",isRightX:true,messages:[
-            "xk+1:"+xk
+            {msg:"xk+1:" + parseFloat(xk).toFixed(4),color:"green"}
           ]});
           if (sequence.length >= maxIterations) {
             if (sequence.indexOf(xk) == -1) {
@@ -514,7 +542,7 @@
       } while (Math.abs(xkOld - xk) > 0.000001);
       console.log("DONE : f(x) == " + selectedEquation(xk) + " and xk == " + xk);
       stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:{min:-100,max:100},color:"red",isRightX:true,messages:[
-        "Le point xk approximer final est : " + xk
+        {msg:"Le point xk approximer final est : " + parseFloat(xk).toFixed(4),color:"red"}
       ]});
       return {
         xk: xk,
