@@ -1,0 +1,247 @@
+<html>
+<body>
+<script type='text/javascript'>
+
+// main
+
+function main()
+{
+	var approximators = TaylorFunctionApproximator.Instances;
+
+	var functionParameterPairs =
+	[
+		[ approximators.exponential, 	1		],
+		[ approximators.exponential, 	2		],
+
+		[ approximators.sine, 		Math.PI		],
+		[ approximators.sine, 		Math.PI / 2	],
+		[ approximators.sine, 		Math.PI / 4	],
+
+		[ approximators.cosine, 	Math.PI		],
+		[ approximators.cosine, 	Math.PI / 2	],
+		[ approximators.cosine, 	Math.PI / 4	],
+
+		[ approximators.naturalLog, 	1		],
+		[ approximators.naturalLog, 	.1		],
+	];
+
+	var textToShow = "";
+
+	for (var i = 0; i < functionParameterPairs.length; i++)
+	{
+		var functionParameterPair = functionParameterPairs[i];
+		var approximator = functionParameterPair[0];
+		var parameter = functionParameterPair[1];
+
+		var result = approximator.calculate(parameter);
+
+		textToShow +=
+			approximator.name
+			+ "("
+			+ parameter
+			+ ") to "
+			+ approximator.numberOfTermsToCalculate
+			+ " approximations is: "
+			+ result
+			+ "<br />";
+
+	}
+
+	document.write(textToShow);
+
+}
+
+// classes
+
+function TaylorFunctionApproximator(name, calculateTermNext)
+{
+	this.name = name;
+	this.calculateTermNext = calculateTermNext;
+
+	this.numberOfTermsToCalculate = 32; // default;
+}
+{
+	TaylorFunctionApproximator.Instances = new TaylorFunctionApproximator_Instances();
+
+	function TaylorFunctionApproximator_Instances()
+	{
+		this.cosine = new TaylorFunctionApproximator
+		(
+			"cosine",
+			// calculateTermNext
+			function(termCurrent, index, parameter)
+			{
+				if (index == 0)
+				{
+					termCurrent = new Term(1, 1);
+				}
+				else
+				{
+					termCurrent.multiplyScalar
+					(
+						parameter * parameter * -1
+					).divideScalar
+					(
+						(2 * index - 1)
+						* (2 * index)
+					);
+				}
+
+				return termCurrent;
+			}
+		);
+
+		this.exponential = new TaylorFunctionApproximator
+		(
+			"exponential",
+			// calculateTermNext
+			function(termCurrent, index, parameter)
+			{
+				if (index == 0)
+				{
+					termCurrent = new Term(1, 1);
+				}
+				else
+				{
+					termCurrent.multiplyScalar
+					(
+						parameter
+					).divideScalar
+					(
+						index
+					);
+				}
+
+				return termCurrent;
+			}
+		);
+
+		this.naturalLog = new TaylorFunctionApproximator
+		(
+			"naturalLog",
+			// calculateTermNext
+			function(termCurrent, index, parameter)
+			{
+				// Only accurate in range
+				// (-1 <= parameter <= 1, parameter != 0)
+
+				if (index == 0)
+				{
+					termCurrent = new Term(parameter - 1, 1);
+				}
+				else
+				{
+					termCurrent.multiplyScalar
+					(
+						0 - (parameter - 1)
+					);
+
+					termCurrent.denominator = index + 1;
+				}
+
+				return termCurrent;
+			}
+		);
+
+
+		this.sine = new TaylorFunctionApproximator
+		(
+			"sine",
+			// calculateTermNext
+			function(termCurrent, index, parameter)
+			{
+				if (index == 0)
+				{
+					termCurrent = new Term(parameter, 1);
+				}
+				else
+				{
+					termCurrent.multiplyScalar
+					(
+						parameter * parameter * -1
+					).divideScalar
+					(
+						(2 * index)
+						* (2 * index + 1)
+					);
+				}
+
+				return termCurrent;
+			}
+		);
+	}
+
+	TaylorFunctionApproximator.prototype.calculate = function(parameter)
+	{
+		var sumSoFar = 0;
+
+		var termCurrent = null;
+
+		for (var i = 0; i < this.numberOfTermsToCalculate; i++)
+		{
+			termCurrent = this.calculateTermNext
+			(
+				termCurrent, i, parameter
+			);
+
+			sumSoFar += termCurrent.toNumber();
+		}
+
+		return sumSoFar;
+	}
+}
+
+function Term(numerator, denominator)
+{
+	this.numerator = numerator;
+	this.denominator = denominator;
+}
+{
+	Term.prototype.clone = function()
+	{
+		return new Term(this.numerator, this.denominator);
+	}
+
+	Term.prototype.divide = function(other)
+	{
+		this.numerator *= other.denominator;
+		this.denominator *= other.numerator;
+
+		return this;
+	}
+
+	Term.prototype.divideScalar = function(scalar)
+	{
+		this.denominator *= scalar;
+
+		return this;
+	}
+
+	Term.prototype.multiply = function(other)
+	{
+		this.numerator *= other.numerator;
+		this.denominator *= other.denominator;
+
+		return this;
+	}
+
+	Term.prototype.multiplyScalar = function(scalar)
+	{
+		this.numerator *= scalar;
+
+		return this;
+	}
+
+	Term.prototype.toNumber = function()
+	{
+		return this.numerator / this.denominator;
+	}
+}
+
+// run
+
+main();
+
+</script>
+</body>
+</html>

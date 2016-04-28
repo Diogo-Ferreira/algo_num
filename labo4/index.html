@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Labo 4</title>
+  </head>
+  <body>
+    <canvas width="600px" height="480px" id="myCanvas"></canvas>
+    <script src="graph.js"></script>
+    <script>
+    function central_derivative(f,x,h){
+      return (f(x + h) - f(x-h))/(2*h);
+    }
+
+    function get_taylor_n_term(x,n){
+      return parseFloat(Math.pow(-1,n) * Math.pow(x,2*n))/parseFloat(fact(2*n));
+    }
+    function fact(num){
+        var rval=1;
+        for (var i = 2; i <= num; i++)
+            rval = rval * i;
+        return rval;
+    }
+
+    var myGraph = new Graph({
+      canvasId: 'myCanvas',
+      minX: -10,
+      minY: -10,
+      maxX: 10,
+      maxY: 10,
+      unitsPerTick: 1
+    });
+    var f = function(x,n=10){
+      var sum = 0;
+      for(var i = 0; i < n; i++){
+        sum += get_taylor_n_term(x,i);
+      }
+      return sum;
+    }
+    myGraph.drawEquation(function(x) {
+      return f(x,4);
+    }, 'red', 3);
+    myGraph.drawEquation(function(x) {
+      return f(x,5);
+    }, 'blue', 3);
+    myGraph.drawEquation(function(x) {
+      return f(x,6);
+    }, 'black', 3);
+    myGraph.drawEquation(function(x) {
+      return f(x,7);
+    }, 'violet', 3);
+    myGraph.drawEquation(function(x) {
+      return f(x,10);
+    }, 'orange', 3);
+
+    </script>
+  </body>
+</html>
