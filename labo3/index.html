@@ -35,6 +35,8 @@
   </section>
   <section>
     <h2>Votre système linéaire</h2>
+
+    <input type="button" id="eliminationGauss" onclick="eliminaionGauss();" value="Calculer" />
     <table id="tableMatrix">
     </table>
 
@@ -50,6 +52,16 @@
     }
 
     Matrix.prototype = {
+      copy : function() {
+        var m = new Matrix(this.n);
+        for(var i = 0 ; i<this.n ; i++) {
+          for(var j = 0 ; j<this.n ; j++) {
+            m.put(i, j, parseFloat(this.get(i, j)));
+          }
+        }
+        return m;
+      },
+
       put : function(row, column, value) {
         if(this.rows[row] == undefined){
           this.rows[row] = [];
@@ -64,7 +76,7 @@
 
       display : function(tableID) {
 
-        clearTable(tableID);
+        //clearTable(tableID);
         var table = document.getElementById(tableID);
         var newRow, column, index=0, cell=0;
         for(var i = 0; i<this.rows.length ; i++) {
@@ -78,7 +90,7 @@
       }
     }
 
-    var matrix, matrixUnknow, matrixResult;
+    var matrix, matrixUnknow, matrixResult, matrixGauss;
 
     function changeFileJson(evt) {
       file = evt.target.files[0];
@@ -154,36 +166,38 @@
 
     function eliminaionGauss() {
       if(matrix == undefined) {
-        alert("La matrice n'est pas définie.");
+        alert("Aucune matrix choisie!");
         return;
       }
 
+      matrixGauss = matrix.copy();
+
       var x=[], p,s, i,j,k, val=0;
-      for(k = 0 ; k < matrix.n-1 ; k++) {
-        if(matrix.get(k, k) == 0) {
+      for(k = 0 ; k < matrixGauss.n-1 ; k++) {
+        if(matrixGauss.get(k, k) == 0) {
           alert("Un pivot nul => methode de Gauss non applicable!");
           return;
         }
 
         //Reduction
-        for(i = k+1 ; i<matrix.n ; i++) {
-          p = matrix.get(i, k)/matrix.get(k, k);
-          for(j = k ; j<matrix.n ; j++) {
-            val = (matrix.get(i, j)-p*matrix.get(k, j)).toFixed(2);
-            matrix.put(i, j, val);
+        for(i = k+1 ; i<matrixGauss.n ; i++) {
+          p = matrixGauss.get(i, k)/matrixGauss.get(k, k);
+          for(j = k ; j<matrixGauss.n ; j++) {
+            val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j)).toFixed(2);
+            matrixGauss.put(i, j, parseFloat(val));
           }
           val = (matrixResult.get(i, 0)-p*matrixResult.get(k, 0)).toFixed(2);
-          matrixResult.put(i, 0, val);
+          matrixResult.put(i, 0, parseFloat(val));
         }
       }
 
       //Resoluton
-      for(i = matrix.n-1 ; i>=0 ; i--) {
+      for(i = matrixGauss.n-1 ; i>=0 ; i--) {
         s=0;
-        for(j = i+1 ; j<matrix.n ; j++) {
-          s=s+matrix.get(i, j)*x[j];
+        for(j = i+1 ; j<matrixGauss.n ; j++) {
+          s=s+matrixGauss.get(i, j)*x[j];
         }
-        x[i]=(matrixResult.get(i, 0)-s)/matrix.get(i, i);
+        x[i]=(matrixResult.get(i, 0)-s)/matrixGauss.get(i, i);
       }
 /*
       var eps=1e-4;
@@ -198,7 +212,7 @@
         }
       }*/
 
-      matrix.display("tableMatrixResult");
+      matrixGauss.display("tableMatrixResult");
       matrixResult.display("tableMatrixResult");
     }
 
