@@ -21,6 +21,14 @@
             rval = rval * i;
         return rval;
     }
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
 
     var myGraph = new Graph({
       canvasId: 'myCanvas',
@@ -37,21 +45,16 @@
       }
       return sum;
     }
-    myGraph.drawEquation(function(x) {
-      return f(x,4);
-    }, 'red', 3);
-    myGraph.drawEquation(function(x) {
-      return f(x,5);
-    }, 'blue', 3);
-    myGraph.drawEquation(function(x) {
-      return f(x,6);
-    }, 'black', 3);
-    myGraph.drawEquation(function(x) {
-      return f(x,7);
-    }, 'violet', 3);
-    myGraph.drawEquation(function(x) {
-      return f(x,10);
-    }, 'orange', 3);
+
+    for(var i = 0; i < 20 ; i ++){
+      setTimeout(function(i_local){
+        myGraph.drawEquation(function(x) {
+          return f(x,i_local+1);
+        }, getRandomColor(), 3);
+      },i*500,i);
+    }
+
+
 
     </script>
   </body>
