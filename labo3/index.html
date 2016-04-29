@@ -35,7 +35,7 @@
   </section>
   <section>
     <h2>Votre système linéaire</h2>
-    <input type="button" id="eliminationGauss" onclick="eliminaionGauss();" value="Calculer" />
+    <input type="button" id="eliminationGauss" onclick="eliminaionGaussWithPartialPivot();" value="Calculer" />
     <br/>
     <br/>
     <table id="tableMatrix">
@@ -282,60 +282,60 @@
         return;
       }
 
-      var r = -1;
 
-      for(var j = 0 ; j<matrix.n ; j++) {
-        console.log("\n\nj="+j+"\n");
-        console.log(matrix);
-         var k = choicePivot(j, r);
-         console.log("k = "+k);
+      var x=[], p,s,ref,tmp,i,j,k,line;
+      matrixGauss = matrix.copy();
 
-         if(matrix.get(k, j) != 0) {
-           r++;
-           console.log("r = "+r);
-           var akj = parseFloat(matrix.get(k, j));
-           console.log("akj ("+k+";"+j+") = "+matrix.get(k, j));
-           for(var i = 0 ; i<matrix.n ; i++) {
-            var val = matrix.get(k, i)/akj;
-            matrix.put(k, i, val);
-            console.log("val/akj = "+val);
-             //matrix.get(k, i) /= akj;
-           }
+      for(k=0 ; k<matrixGauss.n-1 ; k++) {
+        ref = 0;
+        for(i = k ; i<matrixGauss.n ; i++) {
+          if(Math.abs(matrixGauss.get(i, k) > ref)) {
+            ref = Math.abs(matrixGauss.get(i, k));
+            line = i;
+          }
+        }
 
-           var val = matrixResult.get(k, 0)/akj;
-           matrixResult.put(k, 0, val);
-           console.log("val/akj = "+val);
-           //matrixResult.get(k, 0) /= akj;
-
-           if(r != k) {
-             for(var i = 0 ; i<matrix.n ; i++) {
-               var tmp = matrix.get(r, i);
-               matrix.put(r, i, matrix.get(k, i));
-               matrix.put(k, i, tmp);
-               //swap(matrix.get(r, i), matrix.get(k, i));
-             }
-             var tmp = matrixResult.get(r, 0);
-             matrix.put(r, 0, matrix.get(k, 0));
-             matrix.put(k, 0, tmp);
-             //swap(matrixResult.get(r, 0), matrixResult.get(k, 0));
-           }
-
-           for(var i = 0 ; i<matrix.n ; i++) {
-             if(i != r) {
-               var aij = matrix.get(i, j);
-               for(var l = 0 ; l<matrix.n ; l++) {
-                 var result = matrix.get(i, l) - (aij * matrix.get(r, l));
-                 console.log("calc : "+matrix.get(i, l)+" - ( "+aij+" * "+matrix.get(r, l)+" ) => result = "+result);
-                 matrix.put(i, l, result);
-               }
-               var result = matrixResult.get(i, 0) - (aij * matrixResult.get(r, 0));
-               console.log("calc : "+matrixResult.get(i, 0)+" - ( "+aij+" * "+matrixResult.get(r, 0)+" ) => result = "+result);
-               matrixResult.put(i, 0, result);
-             }
-           }
-         }
+      //On "pivote"
+      for(j = k ; j<matrixGauss.n ; j++) {
+        tmp=matrixGauss.get(k, j);
+        matrixGauss.put(k, j, matrixGauss.get(line, j));
+        matrixGauss.put(line, j, tmp);
       }
-      matrix.display("tableMatrixResult");
+
+      tmp=matrixResult.get(k, 0);
+      matrixResult.put(k, 0, matrixResult.get(line, 0));
+      matrixResult.put(line, 0, tmp);
+
+      if(matrixGauss.get(k, k) == 0) {
+        alert("Aucun pivot non nul a été trouvé => methode de Gauss non applicable!");
+        return;
+      }
+
+        //Reduction
+        for(i = k+1 ; i<matrixGauss.n ; i++) {
+          p = matrixGauss.get(i, k)/matrixGauss.get(k, k);
+          for(j = k ; j<matrixGauss.n ; j++) {
+            val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j)).toFixed(2);
+            matrixGauss.put(i, j, parseFloat(val));
+          }
+          val = (matrixResult.get(i, 0)-p*matrixResult.get(k, 0)).toFixed(2);
+          matrixResult.put(i, 0, parseFloat(val));
+        }
+      }
+      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResult.copy());
+
+      //Resoluton
+      for(i = matrixGauss.n-1 ; i>=0 ; i--) {
+        s=0;
+        for(j = i+1 ; j<matrixGauss.n ; j++) {
+          s=s+matrixGauss.get(i, j)*x[j];
+        }
+        x[i]=(matrixResult.get(i, 0)-s)/matrixGauss.get(i, i);
+        finalLinearSystem.addResult(x[i]);
+      }
+
+      finalLinearSystem.displaySystem("tableMatrixResult");
+      finalLinearSystem.displayResult("tableResult");
     }
 
     function clearTable(tableID) {
