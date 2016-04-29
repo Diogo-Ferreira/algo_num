@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>Labo 3 - Groupe 1</title>
   <style>
-    body{font-family: arial;}
+    body{font-family: Cambria;}
   </style>
 </head>
 <body>
@@ -19,7 +19,7 @@
     <output id="list"></output>
   </section>
   <section>
-    <h2>Générer une matrice aléatoirement</h2>
+    <h2>Générer un système aléatoirement</h2>
     <form id="generateMatrixForm">
       <table id="generateMatrixTable" cellspacing="5px">
         <tr>
@@ -29,18 +29,19 @@
         <tr>
           <td><label for="dim">n : </label></td><td><input type="number" id="dim" value="3" /></td>
         </tr>
-        <tr><td colspan="4" align="right"><input type="submit" id="generateMatrix" value="Générer une matrice" /></td></tr>
+        <tr><td colspan="4" align="right"><input type="submit" id="generateMatrix" value="Générer un système" /></td></tr>
       </table>
     </form>
   </section>
   <section>
     <h2>Votre système linéaire</h2>
-    <input type="button" id="eliminationGauss" onclick="eliminaionGaussWithPartialPivot();" value="Calculer" />
-    <br/>
-    <br/>
     <table id="tableMatrix">
     </table>
-
+    <br/>
+    <input type="button" id="eliminationGauss" onclick="eliminaionGaussWithPartialPivot();" value="Calculer" />
+  </section>
+  <section>
+    <h2>Résultat</h2>
     <table id="tableMatrixResult">
     </table>
     <table id="tableResult">
@@ -143,12 +144,15 @@
       }
     }
 
-    var matrix, matrixUnknow, matrixResult, matrixGauss;
+    var matrix, matrixResult, matrixGauss, matrixResultCopy;
     var startLinearSystem, finalLinearSystem;
 
     function changeFileJson(evt) {
       file = evt.target.files[0];
       var fileJson = evt.target;
+      clearTable("tableMatrix");
+      clearTable("tableMatrixResult");
+      clearTable("tableResult");
 
       var reader = new FileReader();
       reader.onload = function(){
@@ -167,7 +171,6 @@
 
       matrix = new Matrix(textJson.n);
       matrixResult = new Matrix(textJson.n);
-      matrixUnknow = new Matrix(textJson.n);
 
       var decal = textJson.n;
       var size = Math.pow(decal, 2);
@@ -181,7 +184,6 @@
       }
 
       for(var i = 0 ; i<decal ; i++) {
-        matrixUnknow.put(i, 0, "x"+i);
         matrixResult.put(i, 0, textJson.B[i]);
       }
 
@@ -192,6 +194,11 @@
     }
 
     function generateMatrix(n, min, max) {
+
+      clearTable("tableMatrix");
+      clearTable("tableMatrixResult");
+      clearTable("tableResult");
+
       var str = "{\"n\":["+n+"],";
       str += "\"A\":[";
 
@@ -228,6 +235,7 @@
       }
 
       matrixGauss = matrix.copy();
+      matrixResultCopy = matrixResult.copy();
 
       var x=[], p,s, i,j,k, val=0;
       for(k = 0 ; k < matrixGauss.n-1 ; k++) {
@@ -243,11 +251,11 @@
             val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j)).toFixed(2);
             matrixGauss.put(i, j, parseFloat(val));
           }
-          val = (matrixResult.get(i, 0)-p*matrixResult.get(k, 0)).toFixed(2);
-          matrixResult.put(i, 0, parseFloat(val));
+          val = (matrixResultCopy.get(i, 0)-p*matrixResultCopy.get(k, 0)).toFixed(2);
+          matrixResultCopy.put(i, 0, parseFloat(val));
         }
       }
-      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResult.copy());
+      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResultCopy.copy());
 
       //Resoluton
       for(i = matrixGauss.n-1 ; i>=0 ; i--) {
@@ -255,7 +263,7 @@
         for(j = i+1 ; j<matrixGauss.n ; j++) {
           s=s+matrixGauss.get(i, j)*x[j];
         }
-        x[i]=(matrixResult.get(i, 0)-s)/matrixGauss.get(i, i);
+        x[i]=(matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i);
         finalLinearSystem.addResult(x[i]);
       }
 /*
@@ -281,10 +289,12 @@
         alert("La matrice n'est pas définie.");
         return;
       }
+      clearTable("tableMatrixResult");
+      clearTable("tableResult");
 
-
-      var x=[], p,s,ref,tmp,i,j,k,line;
+      var x=[], p,s,ref,tmp,i,j,k,line=0;
       matrixGauss = matrix.copy();
+      matrixResultCopy = matrixResult.copy();
 
       for(k=0 ; k<matrixGauss.n-1 ; k++) {
         ref = 0;
@@ -302,9 +312,9 @@
         matrixGauss.put(line, j, tmp);
       }
 
-      tmp=matrixResult.get(k, 0);
-      matrixResult.put(k, 0, matrixResult.get(line, 0));
-      matrixResult.put(line, 0, tmp);
+      tmp=matrixResultCopy.get(k, 0);
+      matrixResultCopy.put(k, 0, matrixResultCopy.get(line, 0));
+      matrixResultCopy.put(line, 0, tmp);
 
       if(matrixGauss.get(k, k) == 0) {
         alert("Aucun pivot non nul a été trouvé => methode de Gauss non applicable!");
@@ -318,11 +328,11 @@
             val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j)).toFixed(2);
             matrixGauss.put(i, j, parseFloat(val));
           }
-          val = (matrixResult.get(i, 0)-p*matrixResult.get(k, 0)).toFixed(2);
-          matrixResult.put(i, 0, parseFloat(val));
+          val = (matrixResultCopy.get(i, 0)-p*matrixResultCopy.get(k, 0)).toFixed(2);
+          matrixResultCopy.put(i, 0, parseFloat(val));
         }
       }
-      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResult.copy());
+      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResultCopy.copy());
 
       //Resoluton
       for(i = matrixGauss.n-1 ; i>=0 ; i--) {
@@ -330,7 +340,7 @@
         for(j = i+1 ; j<matrixGauss.n ; j++) {
           s=s+matrixGauss.get(i, j)*x[j];
         }
-        x[i]=(matrixResult.get(i, 0)-s)/matrixGauss.get(i, i);
+        x[i]=parseFloat((matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i)).toFixed(2);
         finalLinearSystem.addResult(x[i]);
       }
 
@@ -342,18 +352,6 @@
       var table = document.getElementById(tableID);
       var rowCount = table.rows.length;
       while(rowCount--) table.deleteRow(rowCount);
-    }
-
-    //Choix du pivot partiel
-    function choicePivot(j, row) {
-
-      var index = row+1;
-      for(var i = row+1 ; i<matrix.n ; i++) {
-        if(Math.abs(matrix.get(i, j)) > Math.abs(matrix.get(index, j))) {
-          index = i;
-        }
-      }
-      return index;
     }
 
     document.getElementById("filesJson").addEventListener("change", changeFileJson, false);
