@@ -35,16 +35,67 @@
   </section>
   <section>
     <h2>Votre système linéaire</h2>
-
     <input type="button" id="eliminationGauss" onclick="eliminaionGauss();" value="Calculer" />
+    <br/>
+    <br/>
     <table id="tableMatrix">
     </table>
 
     <table id="tableMatrixResult">
     </table>
+    <table id="tableResult">
+    </table>
   </section>
 
   <script>
+
+    LinearSystem = function(A, B) {
+      this.A = A;
+      this.B = B;
+      this.x = [];
+    }
+
+    LinearSystem.prototype = {
+
+      displaySystem : function(tableID) {
+        var table = document.getElementById(tableID);
+        var newRow, column;
+        for(var i = 0; i<this.A.n ; i++) {
+          newRow = table.insertRow(-1);
+          for(var j = 0; j<this.A.n ; j++) {
+            column = newRow.insertCell(j);
+            column.align = "center";
+            var val = this.A.get(i, j);
+            column.innerHTML = Math.abs(val)+ " x<sub>"+(j+1)+"</sub>";
+            if((j+1)%this.A.n != 0) {
+              if(val >= 0) {
+                column.innerHTML += " + ";
+              } else {
+                column.innerHTML += " - ";
+              }
+            }
+          }
+          column = newRow.insertCell(-1);
+          column.align = "center";
+          column.innerHTML = " = "+this.B.get(i, 0);
+        }
+      },
+
+      displayResult : function(tableID) {
+        var table = document.getElementById(tableID);
+        var column;
+        var newRow = table.insertRow(-1);
+        for(var i = 0; i<this.x.length ; i++) {
+          column = newRow.insertCell(i);
+          column.align = "center";
+          column.innerHTML = "x<sub>"+(i+1)+"</sub> = "+this.x[i];
+        }
+      },
+
+      addResult : function(value) {
+        this.x.push(value);
+      }
+    }
 
     Matrix = function(n) {
       this.n = n;
@@ -74,9 +125,11 @@
         return this.rows[row][column];
       },
 
-      display : function(tableID) {
+      display : function(tableID, isCleared) {
+        isCleared = typeof isCleared !== 'undefined' ? isCleared : true;
 
-        //clearTable(tableID);
+        if(isCleared)
+          clearTable(tableID);
         var table = document.getElementById(tableID);
         var newRow, column, index=0, cell=0;
         for(var i = 0; i<this.rows.length ; i++) {
@@ -91,6 +144,7 @@
     }
 
     var matrix, matrixUnknow, matrixResult, matrixGauss;
+    var startLinearSystem, finalLinearSystem;
 
     function changeFileJson(evt) {
       file = evt.target.files[0];
@@ -131,7 +185,10 @@
         matrixResult.put(i, 0, textJson.B[i]);
       }
 
-      matrix.display("tableMatrix");
+      startLinearSystem = new LinearSystem(matrix.copy(), matrixResult.copy());
+      startLinearSystem.displaySystem("tableMatrix");
+
+    //  matrix.display("tableMatrix");
     }
 
     function generateMatrix(n, min, max) {
@@ -190,6 +247,7 @@
           matrixResult.put(i, 0, parseFloat(val));
         }
       }
+      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResult.copy());
 
       //Resoluton
       for(i = matrixGauss.n-1 ; i>=0 ; i--) {
@@ -198,6 +256,7 @@
           s=s+matrixGauss.get(i, j)*x[j];
         }
         x[i]=(matrixResult.get(i, 0)-s)/matrixGauss.get(i, i);
+        finalLinearSystem.addResult(x[i]);
       }
 /*
       var eps=1e-4;
@@ -211,9 +270,10 @@
           matrixResult.put(i, 0, 0);
         }
       }*/
-
-      matrixGauss.display("tableMatrixResult");
-      matrixResult.display("tableMatrixResult");
+      finalLinearSystem.displaySystem("tableMatrixResult");
+      finalLinearSystem.displayResult("tableResult");
+    /*  matrixGauss.display("tableMatrixResult", false);tableResult
+      matrixResult.display("tableMatrixResult", false);*/
     }
 
     function eliminaionGaussWithPartialPivot() {
