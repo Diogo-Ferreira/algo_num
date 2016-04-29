@@ -10,28 +10,44 @@
 </head>
 <body>
   <header>
-    <h1>Eliminiation de Gauss</h1>
+    <h1>Résolution d'un système linéaire avec l'éliminiation de Gauss</h1>
   </header>
 
   <section>
-    <h2>Choix du fichier de la matrice</h2>
-    <input type="file" id="filesJson" name="files[]" accept=".json" />
-    <output id="list"></output>
+    <table>
+      <tr>
+        <td style="padding-right: 30px;"><h2>Choisir le fichier du système</h2></td>
+        <td style="padding-right: 30px;"><h2>ou</h2></td>
+        <td><h2>Générer un système aléatoirement</h2></td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <input type="file" id="filesJson" name="files[]" accept=".json" />
+          <output id="list"></output>
+        </td>
+        <td style="padding-right: 30px;"></td>
+        <td style="padding-right: 30px;">
+          <form id="generateMatrixForm">
+            <table id="generateMatrixTable" cellspacing="5px">
+              <tr>
+                <td><label for="dim">n : </label></td><td><input type="number" id="dim" min="1" value="3" /></td>
+              </tr>
+              <tr>
+                <td><label for="min" >Min : </label></td><td><input type="number" id="min" value="-50"/></td>
+                <td><label for="max" >Max : </label></td><td><input type="number" id="max" value="50"/></td>
+              </tr>
+              <tr><td colspan="4" align="right"><input type="submit" id="generateMatrix" value="Générer un système" /></td></tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+
+
   </section>
   <section>
-    <h2>Générer un système aléatoirement</h2>
-    <form id="generateMatrixForm">
-      <table id="generateMatrixTable" cellspacing="5px">
-        <tr>
-          <td><label for="min" >Min : </label></td><td><input type="number" id="min" value="-50"/></td>
-          <td><label for="max" >Max : </label></td><td><input type="number" id="max" value="50"/></td>
-        </tr>
-        <tr>
-          <td><label for="dim">n : </label></td><td><input type="number" id="dim" value="3" /></td>
-        </tr>
-        <tr><td colspan="4" align="right"><input type="submit" id="generateMatrix" value="Générer un système" /></td></tr>
-      </table>
-    </form>
+
+
   </section>
   <section>
     <h2>Votre système linéaire</h2>
@@ -44,7 +60,7 @@
     <h2>Résultat</h2>
     <table id="tableMatrixResult">
     </table>
-    <table id="tableResult">
+    <table id="tableResult" border="1">
     </table>
   </section>
 
@@ -67,7 +83,10 @@
             column = newRow.insertCell(j);
             column.align = "center";
             var val = this.A.get(i, j);
-            column.innerHTML = Math.abs(val)+ " x<sub>"+(j+1)+"</sub>";
+            if(j == 0 && val < 0) {
+              column.innerHTML += " - ";
+            }
+            column.innerHTML += Math.abs(val)+ " x<sub>"+(j+1)+"</sub>";
             if((j+1)%this.A.n != 0) {
               if(val >= 0) {
                 column.innerHTML += " + ";
@@ -194,6 +213,14 @@
     }
 
     function generateMatrix(n, min, max) {
+
+      if(min > max) {
+        alert("Le min ("+min+") doit être plus petit que le max ("+max+")!");
+        return;
+      } else if(n < 1) {
+        alert("La dimension ("+n+") n'est pas valable!");
+        return;
+      }
 
       clearTable("tableMatrix");
       clearTable("tableMatrixResult");
