@@ -85,15 +85,14 @@
             var val = this.A.get(i, j);
             if(j == 0 && val < 0) {
               column.innerHTML += " - ";
-            }
-            column.innerHTML += Math.abs(val)+ " x<sub>"+(j+1)+"</sub>";
-            if((j+1)%this.A.n != 0) {
+            } else {
               if(val >= 0) {
                 column.innerHTML += " + ";
               } else {
                 column.innerHTML += " - ";
               }
             }
+            column.innerHTML += Math.abs(val.toFixed(3))+ " x<sub>"+(j+1)+"</sub>";
           }
           column = newRow.insertCell(-1);
           column.align = "center";
@@ -112,8 +111,8 @@
         }
       },
 
-      addResult : function(value) {
-        this.x.push(value);
+      addResult : function(value, i) {
+        this.x[i] = value;
       }
     }
 
@@ -163,6 +162,7 @@
       }
     }
 
+    var file;
     var matrix, matrixResult, matrixGauss, matrixResultCopy;
     var startLinearSystem, finalLinearSystem;
 
@@ -291,7 +291,7 @@
           s=s+matrixGauss.get(i, j)*x[j];
         }
         x[i]=(matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i);
-        finalLinearSystem.addResult(x[i]);
+        finalLinearSystem.addResult(x[i].toFixed(3), i);
       }
 /*
       var eps=1e-4;
@@ -352,10 +352,10 @@
         for(i = k+1 ; i<matrixGauss.n ; i++) {
           p = matrixGauss.get(i, k)/matrixGauss.get(k, k);
           for(j = k ; j<matrixGauss.n ; j++) {
-            val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j)).toFixed(2);
+            val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j));
             matrixGauss.put(i, j, parseFloat(val));
           }
-          val = (matrixResultCopy.get(i, 0)-p*matrixResultCopy.get(k, 0)).toFixed(2);
+          val = (matrixResultCopy.get(i, 0)-p*matrixResultCopy.get(k, 0));
           matrixResultCopy.put(i, 0, parseFloat(val));
         }
       }
@@ -365,10 +365,10 @@
       for(i = matrixGauss.n-1 ; i>=0 ; i--) {
         s=0;
         for(j = i+1 ; j<matrixGauss.n ; j++) {
-          s=s+matrixGauss.get(i, j)*x[j];
+          s+=matrixGauss.get(i, j)*x[j];
         }
-        x[i]=parseFloat((matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i)).toFixed(2);
-        finalLinearSystem.addResult(x[i]);
+        x[i]=parseFloat((matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i));
+        finalLinearSystem.addResult(x[i].toFixed(3), i);
       }
 
       finalLinearSystem.displaySystem("tableMatrixResult");
