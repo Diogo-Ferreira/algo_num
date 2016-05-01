@@ -1,0 +1,398 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Labo 3 - Groupe 1</title>
+  <style>
+    body{font-family: Cambria;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Résolution d'un système linéaire avec l'éliminiation de Gauss</h1>
+  </header>
+
+  <section>
+    <table>
+      <tr>
+        <td style="padding-right: 30px;"><h2>Choisir le fichier du système</h2></td>
+        <td style="padding-right: 30px;"><h2>ou</h2></td>
+        <td><h2>Générer un système aléatoirement</h2></td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <input type="file" id="filesJson" name="files[]" accept=".json" />
+          <output id="list"></output>
+        </td>
+        <td style="padding-right: 30px;"></td>
+        <td style="padding-right: 30px;">
+          <form id="generateMatrixForm">
+            <table id="generateMatrixTable" cellspacing="5px">
+              <tr>
+                <td><label for="dim">n : </label></td><td><input type="number" id="dim" min="1" value="3" /></td>
+              </tr>
+              <tr>
+                <td><label for="min" >Min : </label></td><td><input type="number" id="min" value="-50"/></td>
+                <td><label for="max" >Max : </label></td><td><input type="number" id="max" value="50"/></td>
+              </tr>
+              <tr><td colspan="4" align="right"><input type="submit" id="generateMatrix" value="Générer un système" /></td></tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+    </table>
+
+
+  </section>
+  <section>
+
+
+  </section>
+  <section>
+    <h2>Votre système linéaire</h2>
+    <table id="tableMatrix">
+    </table>
+    <br/>
+    <input type="button" id="eliminationGauss" onclick="eliminaionGaussWithPartialPivot();" value="Calculer" />
+  </section>
+  <section>
+    <h2>Résultat</h2>
+    <table id="tableMatrixResult">
+    </table>
+    <table id="tableResult" border="1">
+    </table>
+  </section>
+
+  <script>
+
+    LinearSystem = function(A, B) {
+      this.A = A;
+      this.B = B;
+      this.x = [];
+    }
+
+    LinearSystem.prototype = {
+
+      displaySystem : function(tableID) {
+        var table = document.getElementById(tableID);
+        var newRow, column;
+        for(var i = 0; i<this.A.n ; i++) {
+          newRow = table.insertRow(-1);
+          for(var j = 0; j<this.A.n ; j++) {
+            column = newRow.insertCell(j);
+            column.align = "center";
+            var val = this.A.get(i, j);
+            if(j == 0 && val < 0) {
+              column.innerHTML += " - ";
+            } else {
+              if(val >= 0) {
+                column.innerHTML += " + ";
+              } else {
+                column.innerHTML += " - ";
+              }
+            }
+            column.innerHTML += Math.abs(val.toFixed(3))+ " x<sub>"+(j+1)+"</sub>";
+          }
+          column = newRow.insertCell(-1);
+          column.align = "center";
+          column.innerHTML = " = "+this.B.get(i, 0);
+        }
+      },
+
+      displayResult : function(tableID) {
+        var table = document.getElementById(tableID);
+        var column;
+        var newRow = table.insertRow(-1);
+        for(var i = 0; i<this.x.length ; i++) {
+          column = newRow.insertCell(i);
+          column.align = "center";
+          column.innerHTML = "x<sub>"+(i+1)+"</sub> = "+this.x[i];
+        }
+      },
+
+      addResult : function(value, i) {
+        this.x[i] = value;
+      }
+    }
+
+    Matrix = function(n) {
+      this.n = n;
+      this.rows = [];
+    }
+
+    Matrix.prototype = {
+      copy : function() {
+        var m = new Matrix(this.n);
+        for(var i = 0 ; i<this.n ; i++) {
+          for(var j = 0 ; j<this.n ; j++) {
+            m.put(i, j, parseFloat(this.get(i, j)));
+          }
+        }
+        return m;
+      },
+
+      put : function(row, column, value) {
+        if(this.rows[row] == undefined){
+          this.rows[row] = [];
+        }
+        var row = this.rows[row];
+        row[column] = value;
+      },
+
+      get : function(row, column) {
+        return this.rows[row][column];
+      },
+
+      display : function(tableID, isCleared) {
+        isCleared = typeof isCleared !== 'undefined' ? isCleared : true;
+
+        if(isCleared)
+          clearTable(tableID);
+        var table = document.getElementById(tableID);
+        var newRow, column, index=0, cell=0;
+        for(var i = 0; i<this.rows.length ; i++) {
+          newRow = table.insertRow(-1);
+          for(var j = 0; j<this.rows[i].length ; j++) {
+            column = newRow.insertCell(j);
+            column.align = "center";
+            column.innerHTML = this.rows[i][j];
+          }
+        }
+      }
+    }
+
+    var file;
+    var matrix, matrixResult, matrixGauss, matrixResultCopy;
+    var startLinearSystem, finalLinearSystem;
+
+    function changeFileJson(evt) {
+      file = evt.target.files[0];
+      var fileJson = evt.target;
+      clearTable("tableMatrix");
+      clearTable("tableMatrixResult");
+      clearTable("tableResult");
+
+      var reader = new FileReader();
+      reader.onload = function(){
+        var text = reader.result;
+        var parseText = JSON.parse(text);
+        createMatrix(parseText);
+      };
+      reader.readAsText(fileJson.files[0]);
+    }
+
+    function createMatrix(textJson) {
+      if(textJson == undefined || textJson.n == undefined || textJson.A == undefined || textJson.B == undefined) {
+        alert("Le fichier de la matrice comporte une erreur!");
+        return;
+      }
+
+      matrix = new Matrix(textJson.n);
+      matrixResult = new Matrix(textJson.n);
+
+      var decal = textJson.n;
+      var size = Math.pow(decal, 2);
+      var row=0, col=0;
+      for(var i = 0 ; i<size ; i++) {
+        matrix.put(row, col++, textJson.A[i]);
+        if((i+1)%decal == 0) {
+          col=0;
+          row++;
+        }
+      }
+
+      for(var i = 0 ; i<decal ; i++) {
+        matrixResult.put(i, 0, textJson.B[i]);
+      }
+
+      startLinearSystem = new LinearSystem(matrix.copy(), matrixResult.copy());
+      startLinearSystem.displaySystem("tableMatrix");
+
+    //  matrix.display("tableMatrix");
+    }
+
+    function generateMatrix(n, min, max) {
+
+      if(min > max) {
+        alert("Le min ("+min+") doit être plus petit que le max ("+max+")!");
+        return;
+      } else if(n < 1) {
+        alert("La dimension ("+n+") n'est pas valable!");
+        return;
+      }
+
+      clearTable("tableMatrix");
+      clearTable("tableMatrixResult");
+      clearTable("tableResult");
+
+      var str = "{\"n\":["+n+"],";
+      str += "\"A\":[";
+
+      var nbElement = Math.pow(n, 2);
+      for(var i = 0 ; i<nbElement ; i++) {
+        var val = getRandomInt(min, max);
+        str += val;
+        if(i+1 < nbElement) {
+          str+=",";
+        }
+      }
+      str+="],\"B\":[";
+      for(var i = 0 ; i<n ; i++) {
+        var val = getRandomInt(min, max);
+        str += val;
+        if(i+1 < n) {
+          str+=",";
+        }
+      }
+      str+="]}";
+
+      var parseText = JSON.parse(str);
+      createMatrix(parseText);
+    }
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    function eliminaionGauss() {
+      if(matrix == undefined) {
+        alert("Aucune matrix choisie!");
+        return;
+      }
+
+      matrixGauss = matrix.copy();
+      matrixResultCopy = matrixResult.copy();
+
+      var x=[], p,s, i,j,k, val=0;
+      for(k = 0 ; k < matrixGauss.n-1 ; k++) {
+        if(matrixGauss.get(k, k) == 0) {
+          alert("Un pivot nul => methode de Gauss non applicable!");
+          return;
+        }
+
+        //Reduction
+        for(i = k+1 ; i<matrixGauss.n ; i++) {
+          p = matrixGauss.get(i, k)/matrixGauss.get(k, k);
+          for(j = k ; j<matrixGauss.n ; j++) {
+            val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j)).toFixed(2);
+            matrixGauss.put(i, j, parseFloat(val));
+          }
+          val = (matrixResultCopy.get(i, 0)-p*matrixResultCopy.get(k, 0)).toFixed(2);
+          matrixResultCopy.put(i, 0, parseFloat(val));
+        }
+      }
+      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResultCopy.copy());
+
+      //Resoluton
+      for(i = matrixGauss.n-1 ; i>=0 ; i--) {
+        s=0;
+        for(j = i+1 ; j<matrixGauss.n ; j++) {
+          s=s+matrixGauss.get(i, j)*x[j];
+        }
+        x[i]=(matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i);
+        finalLinearSystem.addResult(x[i].toFixed(3), i);
+      }
+/*
+      var eps=1e-4;
+      for(i = 0 ; i<matrix.n ; i++) {
+        for(j = 0 ; j<matrix.n ; j++) {
+          if(Math.abs(matrix.get(i, j) < eps)) {
+            matrix.put(i, j, 0);
+          }
+        }
+        if(Math.abs(matrixResult.get(i, 0) < eps)) {
+          matrixResult.put(i, 0, 0);
+        }
+      }*/
+      finalLinearSystem.displaySystem("tableMatrixResult");
+      finalLinearSystem.displayResult("tableResult");
+    /*  matrixGauss.display("tableMatrixResult", false);tableResult
+      matrixResult.display("tableMatrixResult", false);*/
+    }
+
+    function eliminaionGaussWithPartialPivot() {
+      if(matrix == undefined) {
+        alert("La matrice n'est pas définie.");
+        return;
+      }
+      clearTable("tableMatrixResult");
+      clearTable("tableResult");
+
+      var x=[], p,s,ref,tmp,i,j,k,line=0;
+      matrixGauss = matrix.copy();
+      matrixResultCopy = matrixResult.copy();
+
+      for(k=0 ; k<matrixGauss.n-1 ; k++) {
+        ref = 0;
+        for(i = k ; i<matrixGauss.n ; i++) {
+          if(Math.abs(matrixGauss.get(i, k) > ref)) {
+            ref = Math.abs(matrixGauss.get(i, k));
+            line = i;
+          }
+        }
+
+      //On "pivote"
+      for(j = k ; j<matrixGauss.n ; j++) {
+        tmp=matrixGauss.get(k, j);
+        matrixGauss.put(k, j, matrixGauss.get(line, j));
+        matrixGauss.put(line, j, tmp);
+      }
+
+      tmp=matrixResultCopy.get(k, 0);
+      matrixResultCopy.put(k, 0, matrixResultCopy.get(line, 0));
+      matrixResultCopy.put(line, 0, tmp);
+
+      if(matrixGauss.get(k, k) == 0) {
+        alert("Aucun pivot non nul a été trouvé => methode de Gauss non applicable!");
+        return;
+      }
+
+        //Reduction
+        for(i = k+1 ; i<matrixGauss.n ; i++) {
+          p = matrixGauss.get(i, k)/matrixGauss.get(k, k);
+          for(j = k ; j<matrixGauss.n ; j++) {
+            val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j));
+            matrixGauss.put(i, j, parseFloat(val));
+          }
+          val = (matrixResultCopy.get(i, 0)-p*matrixResultCopy.get(k, 0));
+          matrixResultCopy.put(i, 0, parseFloat(val));
+        }
+      }
+      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResultCopy.copy());
+
+      //Resoluton
+      for(i = matrixGauss.n-1 ; i>=0 ; i--) {
+        s=0;
+        for(j = i+1 ; j<matrixGauss.n ; j++) {
+          s+=matrixGauss.get(i, j)*x[j];
+        }
+        x[i]=parseFloat((matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i));
+        finalLinearSystem.addResult(x[i].toFixed(3), i);
+      }
+
+      finalLinearSystem.displaySystem("tableMatrixResult");
+      finalLinearSystem.displayResult("tableResult");
+    }
+
+    function clearTable(tableID) {
+      var table = document.getElementById(tableID);
+      var rowCount = table.rows.length;
+      while(rowCount--) table.deleteRow(rowCount);
+    }
+
+    document.getElementById("filesJson").addEventListener("change", changeFileJson, false);
+
+    var form = document.getElementById("generateMatrixForm");
+    form.onsubmit = function(event) {
+      event.preventDefault();
+      var min = parseInt(document.getElementById("min").value);
+      var max = parseInt(document.getElementById("max").value);
+      var n = parseInt(document.getElementById("dim").value);
+      generateMatrix(n, min, max);
+    }
+
+  </script>
+</body>
+
+</html>
