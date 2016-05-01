@@ -5,11 +5,57 @@
     <title>Labo 4</title>
   </head>
   <body>
-    <canvas width="600px" height="480px" id="myCanvas"></canvas>
+
+    <div id="cosx" style="float:left;">
+      <h1>Cos(x) approximé avec Taylor</h1>
+      <canvas width="600px" height="480px" id="cosxCanvas"></canvas>
+      <br>
+      <label>
+        N min:
+        <input type="number" name="n_min" value="1" id="cosx-n_min"/>
+      </label>
+      <label>
+        N max:
+        <input type="number" name="n_max" value="20" id="cosx-n_max"/>
+      </label>
+      <button id="cosx-start">Start animation</button>
+    </div>
+    <div id="cosx-derivative" style="float:left;">
+      <h1>Cos(x)' approximé avec Taylor</h1>
+      <canvas width="600px" height="480px" id="cosxDerivativeCanvas"></canvas>
+      <br>
+      <label>
+        N min:
+        <input type="number" name="n_min" value="1" id="cosx-derivative-n_min"/>
+      </label>
+      <label>
+        N max:
+        <input type="number" name="n_max" value="20" id="cosx-derivative-n_max"/>
+      </label>
+      <button id="cosx-derivative-start">Start animation</button>
+    </div>
+    <div id="cosx-double-derivative" style="float:left;">
+      <h1>Cos(x)'' approximé avec Taylor</h1>
+      <canvas width="600px" height="480px" id="cosxDoubleDerivativeCanvas"></canvas>
+      <br>
+      <label>
+        N min:
+        <input type="number" name="n_min" value="1" id="cosx-double-derivative-n_min"/>
+      </label>
+      <label>
+        N max:
+        <input type="number" name="n_max" value="20" id="cosx-double-derivative-n_max"/>
+      </label>
+      <button id="cosx-double-derivative-start">Start animation</button>
+    </div>
     <script src="graph.js"></script>
     <script>
     function central_derivative(f,x,h){
       return (f(x + h) - f(x-h))/(2*h);
+    }
+
+    function richardson_derivative(f,n,x,h){
+      return (8 * (f(x + h/2,n) - f(x-h/2)) -f(x+h,n) + f(x-h)) / 6 * h;
     }
 
     function get_taylor_n_term(x,n){
@@ -30,8 +76,24 @@
         return color;
     }
 
-    var myGraph = new Graph({
-      canvasId: 'myCanvas',
+    var cosxGraph = new Graph({
+      canvasId: 'cosxCanvas',
+      minX: -10,
+      minY: -10,
+      maxX: 10,
+      maxY: 10,
+      unitsPerTick: 1
+    });
+    var cosxDerivativeGraph = new Graph({
+      canvasId: 'cosxDerivativeCanvas',
+      minX: -10,
+      minY: -10,
+      maxX: 10,
+      maxY: 10,
+      unitsPerTick: 1
+    });
+    var cosxDoubleDerivativeGraph = new Graph({
+      canvasId: 'cosxDoubleDerivativeCanvas',
       minX: -10,
       minY: -10,
       maxX: 10,
@@ -46,16 +108,43 @@
       return sum;
     }
 
-    for(var i = 0; i < 20 ; i ++){
-      setTimeout(function(i_local){
-        myGraph.drawEquation(function(x) {
-          return f(x,i_local+1);
-        }, getRandomColor(), 3);
-      },i*500,i);
-    }
 
-
-
+    document.getElementById("cosx-start").onclick = function(event){
+      var min = document.getElementById("cosx-n_min").value;
+      var max = document.getElementById("cosx-n_max").value;
+      for(var i = min,anim=0; i <= max ; i ++,anim++){
+        setTimeout(function(i_local){
+          cosxGraph.drawEquation(function(x) {
+            return f(x,i_local);
+          }, getRandomColor(), 3);
+        },anim*500,i);
+      }
+    };
+    document.getElementById("cosx-derivative-start").onclick = function(event){
+      var min = document.getElementById("cosx-derivative-n_min").value;
+      var max = document.getElementById("cosx-derivative-n_max").value;
+      for(var i = min,anim=0; i <= max ; i ++,anim++){
+        setTimeout(function(i_local){
+          cosxDerivativeGraph.drawEquation(function(x) {
+            return richardson_derivative(f,i_local,x,1);
+          }, getRandomColor(), 3);
+        },anim*500,i);
+      }
+    };
+    document.getElementById("cosx-double-derivative-start").onclick = function(event){
+      var min = document.getElementById("cosx-double-derivative-n_min").value;
+      var max = document.getElementById("cosx-double-derivative-n_max").value;
+      var inner_f = function(x,n){
+        return richardson_derivative(f,n,x,1);
+      }
+      for(var i = min,anim=0; i <= max ; i ++,anim++){
+        setTimeout(function(i_local){
+          cosxDoubleDerivativeGraph.drawEquation(function(x) {
+            return richardson_derivative(inner_f,i_local,x,1);
+          }, getRandomColor(), 3);
+        },anim*500,i);
+      }
+    };
     </script>
   </body>
 </html>
