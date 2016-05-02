@@ -63,6 +63,37 @@
     <table id="tableResult" border="1">
     </table>
   </section>
+  <section>
+	<h2>Rapport</h2>
+	<h3>Introduction</h3>
+	<p>
+		Ce laboratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Le but de ce projet 
+		est de réaliser un programme en HTML5 et javascript capable de résoudre un système d'équations.
+		Pour ce faire, la méthode de l'élimination de Gauss est imposée et les données du système d'équations
+		doivent être lues depuis un fichier json.
+	</p>
+	<h3>Méthode de développement</h3>
+	<p>
+		Pour commencer ce projet, il faut bien assimiler le principe de l'élimination de Gauss qui dit: "A toute
+		équation d'un système linéaire, on peut ajouter toute combinaison linéaire des autres équations, sans que cela
+		ne change les valeurs des solutions". Il faut donc pouvoir éliminer des variables en combinant deux équations. 
+		Tout d'abord un pivot est déterminé, ce n'est en fait qu'une équation qui restera inchangée tout au long
+		de la résolution. Puis, il faut éliminer les variables comme dit précédemment de façon à obtenir une matrice 
+		trangulaire. Grâce à cela, la dernière équation sera de la forme "x=y" ce qui nous donne la valeur d'une inconnue. 
+		En remontant chaque ligne du système et en remplaçant les variables par leur valeurs, on peut déterminer les valeurs 
+		des inconnues contenues dans les lignes supérieures jusqu'à connaître toutes les valeurs des inconnues. Notre programme peut soit 
+		résoudre les sytèmes linéaires lus depuis un fichier json soit générer un système d'équation aléatoire. Pour la lecture du système 
+		depuis un fichier json, le programme vérifie que le fichier contienne bien les champs nécessaires et si ce n'est pas le cas, l'utilisateur 
+		reçoit une alerte signalant que le fichier json peut être corrompu. Pour la génération aléatoire du système, l'utilisateur  doit juste 
+		choisir l'ordre de la matrice carrée et choisir les valeurs minimales et maximales que la matrice peut contenir.
+	</p>
+	<h3>Conclusion</h3>
+	<p>
+		Le programme est testé avec des matrices lues depuis des fichiers json et des matrice générées directement par 
+		ce même programme. Tous les résultats sont vérifiés avec Mathematica et toutes les valeurs déterminées correspondent
+		bien. On peut donc en conclure que le programme effectue correctement la résolution du système d'équations linéaires.
+	</p>
+  </section>
 
   <script>
 
