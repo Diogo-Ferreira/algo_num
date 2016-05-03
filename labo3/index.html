@@ -57,7 +57,7 @@
     <input type="button" id="eliminationGauss" onclick="eliminaionGaussWithPartialPivot();" value="Calculer" />
   </section>
   <section>
-    <h2>Résultat</h2>
+    <table><tr><td style="padding-right: 30px;"><h2>Résultat</h2></td><td>Temps d'exécution : </td><td><div id="time">0.00 ms</div></td></tr></table>
     <table id="tableMatrixResult">
     </table>
     <table id="tableResult" border="1">
@@ -67,7 +67,7 @@
 	<h2>Rapport</h2>
 	<h3>Introduction</h3>
 	<p>
-		Ce laboratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Le but de ce projet 
+		Ce laboratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Le but de ce projet
 		est de réaliser un programme en HTML5 et javascript capable de résoudre un système d'équations.
 		Pour ce faire, la méthode de l'élimination de Gauss est imposée et les données du système d'équations
 		doivent être lues depuis un fichier json.
@@ -76,20 +76,20 @@
 	<p>
 		Pour commencer ce projet, il faut bien assimiler le principe de l'élimination de Gauss qui dit: "A toute
 		équation d'un système linéaire, on peut ajouter toute combinaison linéaire des autres équations, sans que cela
-		ne change les valeurs des solutions". Il faut donc pouvoir éliminer des variables en combinant deux équations. 
+		ne change les valeurs des solutions". Il faut donc pouvoir éliminer des variables en combinant deux équations.
 		Tout d'abord un pivot est déterminé, ce n'est en fait qu'une équation qui restera inchangée tout au long
-		de la résolution. Puis, il faut éliminer les variables comme dit précédemment de façon à obtenir une matrice 
-		trangulaire. Grâce à cela, la dernière équation sera de la forme "x=y" ce qui nous donne la valeur d'une inconnue. 
-		En remontant chaque ligne du système et en remplaçant les variables par leur valeurs, on peut déterminer les valeurs 
-		des inconnues contenues dans les lignes supérieures jusqu'à connaître toutes les valeurs des inconnues. Notre programme peut soit 
-		résoudre les sytèmes linéaires lus depuis un fichier json soit générer un système d'équation aléatoire. Pour la lecture du système 
-		depuis un fichier json, le programme vérifie que le fichier contienne bien les champs nécessaires et si ce n'est pas le cas, l'utilisateur 
-		reçoit une alerte signalant que le fichier json peut être corrompu. Pour la génération aléatoire du système, l'utilisateur  doit juste 
+		de la résolution. Puis, il faut éliminer les variables comme dit précédemment de façon à obtenir une matrice
+		trangulaire. Grâce à cela, la dernière équation sera de la forme "x=y" ce qui nous donne la valeur d'une inconnue.
+		En remontant chaque ligne du système et en remplaçant les variables par leur valeurs, on peut déterminer les valeurs
+		des inconnues contenues dans les lignes supérieures jusqu'à connaître toutes les valeurs des inconnues. Notre programme peut soit
+		résoudre les sytèmes linéaires lus depuis un fichier json soit générer un système d'équation aléatoire. Pour la lecture du système
+		depuis un fichier json, le programme vérifie que le fichier contienne bien les champs nécessaires et si ce n'est pas le cas, l'utilisateur
+		reçoit une alerte signalant que le fichier json peut être corrompu. Pour la génération aléatoire du système, l'utilisateur  doit juste
 		choisir l'ordre de la matrice carrée et choisir les valeurs minimales et maximales que la matrice peut contenir.
 	</p>
 	<h3>Conclusion</h3>
 	<p>
-		Le programme est testé avec des matrices lues depuis des fichiers json et des matrice générées directement par 
+		Le programme est testé avec des matrices lues depuis des fichiers json et des matrice générées directement par
 		ce même programme. Tous les résultats sont vérifiés avec Mathematica et toutes les valeurs déterminées correspondent
 		bien. On peut donc en conclure que le programme effectue correctement la résolution du système d'équations linéaires.
 	</p>
@@ -286,62 +286,6 @@
       return Math.floor(Math.random() * (max - min)) + min;
     }
 
-    function eliminaionGauss() {
-      if(matrix == undefined) {
-        alert("Aucune matrix choisie!");
-        return;
-      }
-
-      matrixGauss = matrix.copy();
-      matrixResultCopy = matrixResult.copy();
-
-      var x=[], p,s, i,j,k, val=0;
-      for(k = 0 ; k < matrixGauss.n-1 ; k++) {
-        if(matrixGauss.get(k, k) == 0) {
-          alert("Un pivot nul => methode de Gauss non applicable!");
-          return;
-        }
-
-        //Reduction
-        for(i = k+1 ; i<matrixGauss.n ; i++) {
-          p = matrixGauss.get(i, k)/matrixGauss.get(k, k);
-          for(j = k ; j<matrixGauss.n ; j++) {
-            val = (matrixGauss.get(i, j)-p*matrixGauss.get(k, j)).toFixed(2);
-            matrixGauss.put(i, j, parseFloat(val));
-          }
-          val = (matrixResultCopy.get(i, 0)-p*matrixResultCopy.get(k, 0)).toFixed(2);
-          matrixResultCopy.put(i, 0, parseFloat(val));
-        }
-      }
-      finalLinearSystem = new LinearSystem(matrixGauss.copy(), matrixResultCopy.copy());
-
-      //Resoluton
-      for(i = matrixGauss.n-1 ; i>=0 ; i--) {
-        s=0;
-        for(j = i+1 ; j<matrixGauss.n ; j++) {
-          s=s+matrixGauss.get(i, j)*x[j];
-        }
-        x[i]=(matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i);
-        finalLinearSystem.addResult(x[i].toFixed(3), i);
-      }
-/*
-      var eps=1e-4;
-      for(i = 0 ; i<matrix.n ; i++) {
-        for(j = 0 ; j<matrix.n ; j++) {
-          if(Math.abs(matrix.get(i, j) < eps)) {
-            matrix.put(i, j, 0);
-          }
-        }
-        if(Math.abs(matrixResult.get(i, 0) < eps)) {
-          matrixResult.put(i, 0, 0);
-        }
-      }*/
-      finalLinearSystem.displaySystem("tableMatrixResult");
-      finalLinearSystem.displayResult("tableResult");
-    /*  matrixGauss.display("tableMatrixResult", false);tableResult
-      matrixResult.display("tableMatrixResult", false);*/
-    }
-
     function eliminaionGaussWithPartialPivot() {
       if(matrix == undefined) {
         alert("La matrice n'est pas définie.");
@@ -349,6 +293,8 @@
       }
       clearTable("tableMatrixResult");
       clearTable("tableResult");
+
+      var firstTimestamp = new Date().getTime();
 
       var x=[], p,s,ref,tmp,i,j,k,line=0;
       matrixGauss = matrix.copy();
@@ -401,6 +347,10 @@
         x[i]=parseFloat((matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i));
         finalLinearSystem.addResult(x[i].toFixed(3), i);
       }
+
+      var secondTimestamp = new Date().getTime();
+      var timeTot = secondTimestamp - firstTimestamp;
+      document.getElementById("time").innerHTML = timeTot+" ms";
 
       finalLinearSystem.displaySystem("tableMatrixResult");
       finalLinearSystem.displayResult("tableResult");
