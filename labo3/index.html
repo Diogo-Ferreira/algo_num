@@ -293,8 +293,7 @@
       }
       clearTable("tableMatrixResult");
       clearTable("tableResult");
-
-      var firstTimestamp = new Date().getTime();
+      var firstTimestamp = performance.now();
 
       var x=[], p,s,ref,tmp,i,j,k,line=0;
       matrixGauss = matrix.copy();
@@ -347,9 +346,8 @@
         x[i]=parseFloat((matrixResultCopy.get(i, 0)-s)/matrixGauss.get(i, i));
         finalLinearSystem.addResult(x[i].toFixed(3), i);
       }
-
-      var secondTimestamp = new Date().getTime();
-      var timeTot = secondTimestamp - firstTimestamp;
+      var secondTimestamp = performance.now();
+      var timeTot = (parseFloat(secondTimestamp) - parseFloat(firstTimestamp)).toFixed(3);
       document.getElementById("time").innerHTML = timeTot+" ms";
 
       finalLinearSystem.displaySystem("tableMatrixResult");
