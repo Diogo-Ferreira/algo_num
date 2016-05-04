@@ -1,0 +1,601 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Labo 2 - Groupe 1</title>
+  <style>
+    body{font-family: arial;}
+    .green{
+      background: green;
+      color:white;
+    }
+    .grey{
+      background: grey;
+      color:white;
+    }
+    .blue{
+      background: lightblue;
+      color:white;
+    }
+    .violet{
+      background: violet;
+      color:white;
+    }
+    .red{
+      background: red;
+      color:white;
+    }
+  </style>
+</head>
+<body onload="initialize();">
+  <h1>Résolution d'équation</h1>
+  <div style="float:left;">
+    <form id="form" method="POST">
+      <h2>Configuration des axes :</h2>
+      <table id="axis_config" cellspacing="0" cellpadding="5">
+        <tr>
+          <td>
+            <label for="minX">Min x :</label>
+          </td>
+          <td>
+            <input id="minX" name="axisX" type="number" step="0.1" value="-10"/>
+          </td>
+          <td>
+            <label for="maxX">Max x :</label>
+          </td>
+          <td>
+            <input id="maxX" name="axisX" type="number" step="0.1" value="10"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="minY">Min y :</label>
+          </td>
+          <td>
+            <input id="minY" name="axisY" type="number" step="0.1" value="-2"/>
+          </td>
+          <td>
+            <label for="maxY">Max y :</label>
+          </td>
+          <td>
+            <input id="maxY" name="axisY" type="number" step="0.1" value="2"/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label for="grad">Graduation :</label>
+          </td>
+          <td>
+            <input id="grad" name="grad" type="number" step="0.5" value="1" />
+          </td>
+        </tr>
+      </table>
+      <h2>Fonction :</h2>
+      <table id="table_config">
+        <tr>
+          <td>
+            <label>Choix de la fonction : </label>
+          </td>
+          <td>
+            <select id="select_equ" onchange="onChangeEquation(this);">
+              <option> sin(x) - x/13 </option>
+              <option> x / (1 - x^2) </option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label>x de départ : </label>
+          </td>
+          <td>
+            <input name="xk" id="id_xk" type="number" step="0.01" required/>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label>Taille tableau anti-boucle : </label>
+          </td>
+          <td>
+            <input name="max_iter" id="id_max_iter" type="number" value="10" step="1" required />
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="right">
+            <input type="submit" name="calculer" id="btn_calculer" value="Calculer" />
+        </tr>
+        <tr >
+
+          <td colspan="3">
+            <div style="overflow-y: scroll; max-height:400px;" id="output"></div>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+  <canvas style="float:right;" id="myCanvas" width="1000" height="800"></canvas>
+  <div style="float:left;">
+    <hr/>
+    <h1>Rapport</h1>
+    <h2>Introduction</h2>
+    Ce laboratoire a été réalisé dans le cadre du cours d’algorithmes numériques. Ce projet porte sur la résolution d’une équation. Il a été demandé de pouvoir résoudre les deux équations suivantes : sin(x)-x/13 = 0 et x/(1-x^2) = 0. Il était possible de programmer trois méthodes de résolutions différentes. La méthode de la tangente a été retenue. Dans ce cas, l’objectif bonus est de faire attention à la convergence de la méthode. Ce laboratoire a été réalisé en HTML5 et en javascript.
+    <h2>Méthode de développement</h2>
+    La méthode de la tangente permet donc de trouver l’endroit où une fonction crois l’axe des x. Pour se faire, il faut entrer une valeur de départ. Il est important de vérifier que celle-ci soit comprise dans l’intervalle dans lequel ce projet est réalisé. Ici il s’agit de [-100;100]. Ensuite, il faut trouver la valeur de la fonction pour le point de départ. Une fois ce point trouver, il faut chercher la dérivée en ce point. Pour ce faire, il suffit d’augmenter ou de diminuer un tout petit ce point afin de trouver une pente. Cette pente est la pente de la tangente. Une fois la pente trouvée, il faut trouver l’endroit où elle croise l’axe des y. Pour ce faire, il faut résoudre l’équation b= y-a*x. pour un point de la droite. Une fois la tangente complètement explicitée, on cherche le point où elle crois l’axe des x. Ce point va être le nouveau point de départ pour la prochaine itération.
+    Cette méthode est utilisée tant que l’on n’a pas trouvé le zéro de notre fonction.Cependant on risque de tourner un boucle avec cette méthode, c’est pour cela qu’un tableau est utilisé pour sauvegarder les derniers points, il est important de bien choisir la taille de ce tableau. SI celui-ci est dépassé, le programme demande à l’utilisateur de choisir une nouvelle valeur de départ. Il faut aussi faire attention à la pente de la tangente. Celle-ci ne peut pas être égale à zéro, sinon on ne va jamais croiser l’axe des x, car deux droites parallèles ne se croisent jamais. Il faut aussi faire attention au cas où elle est infinie, ce qui ferait tourner le programme en rond. Dans ces deux derniers cas, le programme demanda aussi à l’utilisateur de choisir une nouvelle valeur de départ.
+    <h2>Conclusion</h2>
+    Le programme fonctionne bien. Il permet de trouver les zéros des deux fonctions demandées. Il respecte bien les notions de débordement d’intervalle. Il est capable de détecter si la pente de la tangente vaut zéro et l’infini. Les tangentes se dessinent même avec une petite animation. De plus, le programme détecte si l’algorithme tourne en rond. Cependant, il faut faire attention aux nombres d’itérations que précisent l’utilisateur. En effet, suivant la valeur de départ choisie, il se peut que le nombre d’itérations entré par défaut ne suffise pas pour trouver le zéro de la fonction. Il faut donc penser à modifier ce nombre au cas où.
+  </div>
+  <script>
+    function outputArea(id) {
+      this.area = document.getElementById(id);
+      this.eraseContent();
+    }
+    outputArea.prototype.addLine = function(line, cls) {
+      this.area.innerHTML += "<div class=" + cls + ">" + line + "</div>";
+      this.area.scrollTop = this.area.scrollHeight;
+    }
+    outputArea.prototype.eraseContent = function() {
+      this.area.innerHTML = "<h2>Sortie</h2>";
+    }
+    function Graph(config) {
+      // user defined properties
+      this.canvas = config.canvas;
+      this.minX = config.minX;
+      this.minY = config.minY;
+      this.maxX = config.maxX;
+      this.maxY = config.maxY;
+      this.unitsPerTick = config.unitsPerTick;
+      // constants
+      this.axisColor = '#aaa';
+      this.font = '8pt Calibri';
+      this.tickSize = 8;
+      // relationships
+      this.context = this.canvas.getContext('2d');
+      this.rangeX = this.maxX - this.minX;
+      this.rangeY = this.maxY - this.minY;
+      this.unitX = this.canvas.width / this.rangeX;
+      this.unitY = this.canvas.height / this.rangeY;
+      this.centerY = Math.round(Math.abs(this.minY / this.rangeY) * this.canvas.height);
+      this.centerX = Math.round(Math.abs(this.minX / this.rangeX) * this.canvas.width);
+      this.iteration = (this.maxX - this.minX) / 1000;
+      this.scaleX = this.canvas.width / this.rangeX;
+      this.scaleY = this.canvas.height / this.rangeY;
+      // draw x and y axis
+      this.drawXAxis();
+      this.drawYAxis();
+    };
+    Graph.prototype.changeAxis = function(axisX, axisY) {
+      this.changeAxisX(axisX);
+      this.changeAxisY(axisY);
+    };
+    Graph.prototype.changeAxisX = function(axisX) {
+      this.minX = axisX.min;
+      this.maxX = axisX.max;
+      this.rangeX = this.maxX - this.minX;
+      this.unitX = this.canvas.width / this.rangeX;
+      this.centerX = Math.round(Math.abs(this.minX / this.rangeX) * this.canvas.width);
+      this.iteration = (this.maxX - this.minX) / 1000;
+      this.scaleX = this.canvas.width / this.rangeX;
+    };
+    Graph.prototype.changeAxisY = function(axisY) {
+      this.minY = axisY.min;
+      this.maxY = axisY.max;
+      this.rangeY = this.maxY - this.minY;
+      this.unitY = this.canvas.height / this.rangeY;
+      this.centerY = Math.round(Math.abs(this.minY / this.rangeY) * this.canvas.height);
+      this.scaleY = this.canvas.height / this.rangeY;
+    };
+    Graph.prototype.changeTicks = function(tick) {
+      this.unitsPerTick = tick;
+    };
+    Graph.prototype.drawXAxis = function() {
+      var context = this.context;
+      context.save();
+      context.beginPath();
+      context.moveTo(0, this.centerY);
+      context.lineTo(this.canvas.width, this.centerY);
+      context.strokeStyle = this.axisColor;
+      context.lineWidth = 2;
+      context.stroke();
+      // draw tick marks
+      var xPosIncrement = this.unitsPerTick * this.unitX;
+      var xPos, unit;
+      context.font = this.font;
+      context.textAlign = 'center';
+      context.textBaseline = 'top';
+      // draw left tick marks
+      xPos = this.centerX - xPosIncrement;
+      unit = -1 * this.unitsPerTick;
+      while (xPos > 0) {
+        context.moveTo(xPos, this.centerY - this.tickSize / 2);
+        context.lineTo(xPos, this.centerY + this.tickSize / 2);
+        context.stroke();
+        context.fillText(unit, xPos, this.centerY + this.tickSize / 2 + 3);
+        unit -= this.unitsPerTick;
+        xPos = Math.round(xPos - xPosIncrement);
+      }
+      // draw right tick marks
+      xPos = this.centerX + xPosIncrement;
+      unit = this.unitsPerTick;
+      while (xPos < this.canvas.width) {
+        context.moveTo(xPos, this.centerY - this.tickSize / 2);
+        context.lineTo(xPos, this.centerY + this.tickSize / 2);
+        context.stroke();
+        context.fillText(unit, xPos, this.centerY + this.tickSize / 2 + 3);
+        unit += this.unitsPerTick;
+        xPos = Math.round(xPos + xPosIncrement);
+      }
+      context.restore();
+    };
+    Graph.prototype.drawYAxis = function() {
+      var context = this.context;
+      context.save();
+      context.beginPath();
+      context.moveTo(this.centerX, 0);
+      context.lineTo(this.centerX, this.canvas.height);
+      context.strokeStyle = this.axisColor;
+      context.lineWidth = 2;
+      context.stroke();
+      // draw tick marks
+      var yPosIncrement = this.unitsPerTick * this.unitY;
+      var yPos, unit;
+      context.font = this.font;
+      context.textAlign = 'right';
+      context.textBaseline = 'middle';
+      // draw top tick marks
+      yPos = this.centerY - yPosIncrement;
+      unit = this.unitsPerTick;
+      while (yPos > 0) {
+        context.moveTo(this.centerX - this.tickSize / 2, yPos);
+        context.lineTo(this.centerX + this.tickSize / 2, yPos);
+        context.stroke();
+        context.fillText(unit, this.centerX - this.tickSize / 2 - 3, yPos);
+        unit += this.unitsPerTick;
+        yPos = Math.round(yPos - yPosIncrement);
+      }
+      // draw bottom tick marks
+      yPos = this.centerY + yPosIncrement;
+      unit = -1 * this.unitsPerTick;
+      while (yPos < this.canvas.height) {
+        context.moveTo(this.centerX - this.tickSize / 2, yPos);
+        context.lineTo(this.centerX + this.tickSize / 2, yPos);
+        context.stroke();
+        context.fillText(unit, this.centerX - this.tickSize / 2 - 3, yPos);
+        unit -= this.unitsPerTick;
+        yPos = Math.round(yPos + yPosIncrement);
+      }
+      context.restore();
+    };
+    Graph.prototype.drawEquation = function(equation, range, isRightX, color, thickness) {
+      var context = this.context;
+      context.save();
+      context.save();
+      this.transformContext();
+      context.beginPath();
+      //  context.moveTo(this.minX, equation(this.minX));
+      if (isRightX) {
+        context.moveTo(equation(), range.min);
+        for (var y = range.min + this.iteration; y <= range.max; y += this.iteration) {
+          context.lineTo(equation(), y);
+        }
+      } else {
+        context.moveTo(range.min, equation(range.min));
+        for (var x = range.min + this.iteration; x <= range.max; x += this.iteration) {
+          //context.lineTo(x, equation(x));
+          context.lineTo(x.toFixed(12), equation(x.toFixed(12)));
+        }
+      }
+      context.restore();
+      context.lineJoin = 'round';
+      context.lineWidth = thickness;
+      context.strokeStyle = color;
+      context.stroke();
+      context.restore();
+    };
+    Graph.prototype.drawPoint = function(point, color, thickness) {
+      var context = this.context;
+      context.save();
+      context.save();
+      this.transformContext();
+      context.beginPath();
+      context.strokeStyle = color;
+      context.fillStyle = color;
+      context.moveTo(point.x, point.y);
+      context.lineTo(point.x + 0.01, point.y + 0.01);
+      //context.arc(point.x,point.y,0.000001,0,2*Math.PI);
+      context.restore();
+      context.lineJoin = 'round';
+      context.lineWidth = thickness;
+      context.stroke();
+      context.restore();
+    };
+    Graph.prototype.deleteGraph = function() {
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.drawXAxis();
+      this.drawYAxis();
+    };
+    Graph.prototype.transformContext = function() {
+      var context = this.context;
+      // move context to center of canvas
+      this.context.translate(this.centerX, this.centerY);
+      /*
+       * stretch grid to fit the canvas window, and
+       * invert the y scale so that that increments
+       * as you move upwards
+       */
+      context.scale(this.scaleX, -this.scaleY);
+    };
+    //Variables globales
+    var limitX = {min:-100, max:100};
+    var limitY = {min:-100, max:100};
+    var isChanged = false;
+    var selectedEquation = null;
+    var myGraph = null;
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+    var minX = parseFloat(document.getElementById("minX").value);
+    var maxX = parseFloat(document.getElementById("maxX").value);
+    var minY = parseFloat(document.getElementById("minY").value);
+    var maxY = parseFloat(document.getElementById("maxY").value);
+    var grad = parseFloat(document.getElementById("grad").value);
+    var lastMinX = parseFloat(document.getElementById("minX").value);
+    var lastMaxX = parseFloat(document.getElementById("maxX").value);
+    var lastMinY = parseFloat(document.getElementById("minY").value);
+    var lastMaxY = parseFloat(document.getElementById("maxY").value);
+    var lastGrad = parseFloat(document.getElementById("grad").value);
+    function initialize() {
+      selectEquation(0);
+      myGraph = new Graph({
+        canvas: canvas,
+        minX: minX,
+        minY: minY,
+        maxX: maxX,
+        maxY: maxY,
+        unitsPerTick: grad
+      });
+      myGraph.drawEquation(selectedEquation, {
+        min: minX,
+        max: maxX
+      }, false, "blue", 2);
+    }
+    function selectEquation(index) {
+      switch (index) {
+        case 0:
+          selectedEquation = function(x) {
+            return Math.sin(x) - (x / 13);
+          }
+          break;
+        case 1:
+          selectedEquation = function(x) {
+            return x / (1 - Math.pow(x, 2));
+          }
+        break;
+      }
+    }
+    //Equation change
+    function onChangeEquation(select) {
+      isChanged = true;
+      var selectedIndex = select.selectedIndex;
+      selectEquation(selectedIndex);
+      myGraph.deleteGraph();
+      myGraph.drawEquation(selectedEquation, {
+        min: myGraph.minX,
+        max: myGraph.maxX
+      }, false, "blue", 2);
+    }
+    function onChangeAxis(type) {
+      if(type == "axisX") {
+        var minX = parseFloat(document.getElementById("minX").value);
+        var maxX = parseFloat(document.getElementById("maxX").value);
+        myGraph.changeAxisX({min:minX, max:maxX});
+        myGraph.drawXAxis();
+      } else if(type == "axisY") {
+        var minY = parseFloat(document.getElementById("minY").value);
+        var maxY = parseFloat(document.getElementById("maxY").value);
+        myGraph.changeAxisY({min:minY, max:maxY});
+        myGraph.drawYAxis();
+      } else if(type == "grad") {
+        var grad = parseFloat(document.getElementById("grad").value);
+        myGraph.changeTicks(grad);
+        myGraph.drawXAxis();
+        myGraph.drawYAxis();
+      }
+      myGraph.deleteGraph();
+      myGraph.drawEquation(selectedEquation, {
+        min: myGraph.minX,
+        max: myGraph.maxX
+      }, false, "blue", 2);
+    }
+    function calculate_click(xInit, maxIter) {
+      myGraph.deleteGraph();
+      myGraph.drawEquation(selectedEquation, {
+        min: myGraph.minX,
+        max: myGraph.maxX
+      }, false, "blue", 2);
+
+      if(myGraph.minX >= xInit || myGraph.maxX < xInit) {
+        alert("Modifier les axes pour mieux voir les animations!");
+      }
+
+      var result = newtonsMethod(xInit, maxIter);
+      this.out = new outputArea("output");
+      result.animation[result.animation.length-1].error = result.error;
+      result.animation.forEach(function(current,index){
+        setTimeout(function(){
+          var xk = current.vars.xk;
+          var a = current.vars.a;
+          var b = current.vars.b;
+          var func;
+          if(Math.abs(selectedEquation(xk)) !== Infinity){
+            if(current.type == "bar")
+              func = function(x){return xk;};
+            else if(current.type == "line")
+              func = function(x){return a * x + b;};
+            myGraph.drawEquation(func, current.range, current.isRightX, current.color, 1);
+            if(current.messages != undefined){
+              current.messages.forEach(function(currentMsg){
+                this.out.addLine(currentMsg.msg,currentMsg.color);
+              });
+            }
+          }
+          if(current.error != undefined){
+            var out;
+            switch (current.error) {
+              case "loop":
+                out = "Boucle infinie, veuillez rédéfinir xk";
+                break;
+              case "out of bounds":
+                out = "Hors domaine, veuillez rédéfinir xk ["+limitX.min+";"+limitX.max+"]";
+                break;
+              case "a=0":
+                out = "pente = 0, veuilleu rédéfinir xk";
+                break;
+              case "a=inf":
+                out = "pente infini, veuilleu rédéfinir xk";
+                break;
+            }
+            alert(out);
+          }
+        },index*500);
+      });
+    }
+    function newtonsMethod(xk, maxIterations) {
+      var maxIterations = typeof maxIterations !== 'undefined' ? maxIterations : 5;
+      var delta = 1e-10;
+      var xkPlusOne, a, b, xdelta, xkOld;
+      var sequence = [];
+      var stepsForAnimations = [];
+      stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:newtonXkLineRange(selectedEquation(xk)),color:"violet",isRightX:true,messages:[
+        {msg:"Premier xk = " + parseFloat(xk).toFixed(4),color:"violet"}
+      ]});
+      do {
+        console.log("f(x) == " + selectedEquation(xk));
+        xdelta = parseFloat(xk) + parseFloat(delta);
+        a = (selectedEquation(xdelta) - selectedEquation(xk)) / parseFloat(delta);
+        console.log("a == " + a);
+        if (Math.abs(a) < 0.001 || isNaN(a) || Math.abs(a) == Infinity) {
+          var error = "a=0";
+          if (Math.abs(a) == Infinity) error = "a=inf";
+          xk = xkOld;
+          return {
+            xk: xk,
+            fOfx: selectedEquation(xk),
+            error: error,
+            animation:stepsForAnimations
+          };
+        } else if (xk >= -100 && xk <= 100) {
+          b = selectedEquation(xk) - parseFloat(a) * parseFloat(xk);
+          stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"line",range:{min: -100,max: 100},color:"grey",isRightX:false,messages:[
+            {msg:"Dessin tangeante du point xk: " + parseFloat(xk).toFixed(4) + " a: " + parseFloat(a).toFixed(4)+ " b: " + parseFloat(b).toFixed(4),color:"grey"}
+          ]});
+          //Xn+1 = x0 - f(x0)/f'(x0) check : https://en.wikipedia.org/wiki/Newton%27s_method
+          xkPlusOne = parseFloat(xk - selectedEquation(xk) / parseFloat(a));
+          console.log("xk == " + xk + " | xk+1 == " + xkPlusOne);
+          xkOld = xk;
+          xk = xkPlusOne;
+          stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:newtonXkLineRange(selectedEquation(xk)),color:"green",isRightX:true,messages:[
+            {msg:"xk+1:" + parseFloat(xk).toFixed(4),color:"green"}
+          ]});
+          if (sequence.length >= maxIterations) {
+            if (sequence.indexOf(xk) == -1) {
+              return {
+                xk: xk,
+                fOfx: selectedEquation(xk),
+                error: "loop",
+                animation:stepsForAnimations
+              }
+            } else {
+              sequence.shift();
+            }
+          }
+          sequence.push(xk);
+        } else {
+          return {
+            xk: xk,
+            fOfx: selectedEquation(xk),
+            error: "out of bounds",
+            animation:stepsForAnimations
+          };
+        }
+      } while (Math.abs(xkOld - xk) > 0.000001);
+      console.log("DONE : f(x) == " + selectedEquation(xk) + " and xk == " + xk);
+      stepsForAnimations.push({vars:{xk:xk,a:a,b:b},type:"bar",range:{min:-100,max:100},color:"red",isRightX:true,messages:[
+        {msg:"Le point xk approximer final est : " + parseFloat(xk).toFixed(4),color:"red"}
+      ]});
+      return {
+        xk: xk,
+        fOfx: selectedEquation(xk),
+        animation:stepsForAnimations
+      };
+    }
+    function newtonXkLineRange(yXk) {
+      var range;
+      if (yXk >= 0) {
+        range = {
+          min: 0,
+          max: yXk
+        };
+      } else {
+        range = {
+          min: yXk,
+          max: 0
+        };
+      }
+      return range;
+    }
+    var form = document.getElementById("form");
+    form.onsubmit = function(event) {
+      event.preventDefault();
+      var xInit = document.getElementById("id_xk").value;
+      var maxIter = document.getElementById("id_max_iter").value;
+      calculate_click(xInit, maxIter);
+    }
+    document.getElementById("minX").addEventListener("change", function () {
+      if(this.value <= 0 && this.value >= limitX.min && this.value != "") {
+        onChangeAxis(this.name);
+        lastMinX=this.value;
+      } else {
+        this.value=lastMinX;
+        alert("Le min en X doit être plus petit que 0 et plus grand que "+limitX.min+"!");
+      }
+    });
+    document.getElementById("maxX").addEventListener("change", function () {
+      if(this.value >= 0 && this.value <= limitX.max && this.value != "") {
+        onChangeAxis(this.name);
+        lastMaxX=this.value;
+      }else {
+        this.value=lastMaxX;
+        alert("Le max en X doit être plus grand que 0 et plus petit que "+limitX.max+"!");
+      }
+    });
+    document.getElementById("minY").addEventListener("change", function () {
+      if(this.value <= 0 && this.value >= limitY.min && this.value != "") {
+        onChangeAxis(this.name);
+        lastMinY=this.value;
+      }else {
+        this.value=lastMinY;
+        alert("Le min en Y doit être plus petit que 0 et plus grand que "+limitY.min+"!");
+      }
+    });
+    document.getElementById("maxY").addEventListener("change", function () {
+      if(this.value >= 0 && this.value <= limitY.max && this.value != "") {
+        onChangeAxis(this.name);
+        lastMaxY=this.value;
+      } else {
+          this.value=lastMaxY;
+          alert("Le max en Y doit être plus grand que 0 et plus petit que "+limitY.max+"!");
+      }
+    });
+    document.getElementById("grad").addEventListener("change", function () {
+        if(this.value > 0 && this.value != "") {
+          onChangeAxis(this.name);
+          lastGrad=this.value;
+        } else {
+          this.value=lastGrad;
+          alert("La graduation doit être plus grand que 0!");
+        }
+    });
+  </script>
+</body>
+
+</html>
