@@ -12,11 +12,11 @@
       <br>
       <label>
         N min:
-        <input type="number" name="n_min" value="1" id="cosx-n_min"/>
+        <input style="width:35px;" type="number" name="n_min" value="1" id="cosx-n_min"/>
       </label>
       <label>
         N max:
-        <input type="number" name="n_max" value="20" id="cosx-n_max"/>
+        <input style="width:35px;" type="number" name="n_max" value="20" id="cosx-n_max"/>
       </label>
       <button id="cosx-start">Start animation</button>
     </div>
@@ -26,11 +26,15 @@
       <br>
       <label>
         N min:
-        <input type="number" name="n_min" value="1" id="cosx-derivative-n_min"/>
+        <input style="width:35px;" type="number" name="n_min" value="1" id="cosx-derivative-n_min"/>
       </label>
       <label>
         N max:
-        <input type="number" name="n_max" value="20" id="cosx-derivative-n_max"/>
+        <input style="width:35px;" type="number" name="n_max" value="20" id="cosx-derivative-n_max"/>
+      </label>
+      <label>
+        h:
+        <input style="width:25px;" type="number" name="cosx-derivative-h" value="1" step="0.1" id="cosx-derivative-h"/>
       </label>
       <button id="cosx-derivative-start">Start animation</button>
     </div>
@@ -40,11 +44,15 @@
       <br>
       <label>
         N min:
-        <input type="number" name="n_min" value="1" id="cosx-double-derivative-n_min"/>
+        <input style="width:35px;" type="number" name="n_min" value="1" id="cosx-double-derivative-n_min"/>
       </label>
       <label>
         N max:
-        <input type="number" name="n_max" value="20" id="cosx-double-derivative-n_max"/>
+        <input style="width:35px;" type="number" name="n_max" value="20" id="cosx-double-derivative-n_max"/>
+      </label>
+      <label>
+        h:
+        <input style="width:25px;" type="number" name="cosx-double-derivative-h" value="1" step="0.1" id="cosx-double-derivative-h"/>
       </label>
       <button id="cosx-double-derivative-start">Start animation</button>
     </div>
@@ -110,39 +118,53 @@
 
 
     document.getElementById("cosx-start").onclick = function(event){
+      cosxGraph.deleteGraph();
       var min = document.getElementById("cosx-n_min").value;
       var max = document.getElementById("cosx-n_max").value;
+      this.disabled = "true";
       for(var i = min,anim=0; i <= max ; i ++,anim++){
-        setTimeout(function(i_local){
+        var input = this;
+        setTimeout(function(i_local,input){
           cosxGraph.drawEquation(function(x) {
             return f(x,i_local);
           }, getRandomColor(), 3);
-        },anim*500,i);
+          if(i_local >= max) input.removeAttribute("disabled");
+        },anim*500,i,input);
       }
     };
     document.getElementById("cosx-derivative-start").onclick = function(event){
+      cosxDerivativeGraph.deleteGraph();
       var min = document.getElementById("cosx-derivative-n_min").value;
       var max = document.getElementById("cosx-derivative-n_max").value;
+      var h = document.getElementById("cosx-derivative-h").value;
+      this.disabled = "true";
       for(var i = min,anim=0; i <= max ; i ++,anim++){
-        setTimeout(function(i_local){
+        var input = this;
+        setTimeout(function(i_local,h_local,input){
           cosxDerivativeGraph.drawEquation(function(x) {
-            return richardson_derivative(f,i_local,x,1);
+            return richardson_derivative(f,i_local,x,h_local);
           }, getRandomColor(), 3);
-        },anim*500,i);
+          if(i_local >= max) input.removeAttribute("disabled");
+        },anim*500,i,parseFloat(h),input);
       }
     };
     document.getElementById("cosx-double-derivative-start").onclick = function(event){
+      cosxDoubleDerivativeGraph.deleteGraph();
       var min = document.getElementById("cosx-double-derivative-n_min").value;
       var max = document.getElementById("cosx-double-derivative-n_max").value;
+      var h = document.getElementById("cosx-double-derivative-h").value;
+      this.disabled = "true";
       var inner_f = function(x,n){
         return richardson_derivative(f,n,x,1);
       }
       for(var i = min,anim=0; i <= max ; i ++,anim++){
-        setTimeout(function(i_local){
+        var input = this;
+        setTimeout(function(i_local,h_local,input){
           cosxDoubleDerivativeGraph.drawEquation(function(x) {
-            return richardson_derivative(inner_f,i_local,x,1);
+            return richardson_derivative(inner_f,i_local,x,h_local);
           }, getRandomColor(), 3);
-        },anim*500,i);
+          if(i_local >= max) input.removeAttribute("disabled");
+        },anim*500,i,parseFloat(h),input);
       }
     };
     </script>
