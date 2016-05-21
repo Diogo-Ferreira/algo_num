@@ -7,42 +7,45 @@
 <body>
     <script>
         var REAL_PI = 3.14159265358979323;
-                      /*3.1415926535897944
-                      3.1429259869231245
-                      3.1415926535897913*/
         var f = function(x){
             return 4 / (1 + x*x);
         }
         function simpson(f,a,b,n){
             var sum = 0.0;
             var h = parseFloat((b-a) / n);
-            for(var i = 1 ; i < n ; i++){
 
-                //Somme i pair
-                if( i % 2 == 0){
-                    sum += 2 * f(a + i * h);
-                }
-                //Somme i impair
-                else{
-                    sum += 4 * f(a + i * h);
-                }
+            for(var i = 1 ; i < n ; i+=2){
+                if((i+1) < n) sum += 2 * f(a + (i+1) * h);
+                sum += 4 * f(a + i * h);
             }
             return (h/3) * (f(a) + sum + f(b));
         }
 
-        /*var start = performance.now();
-        var pi = simpson(f,0.0,1.0,198);
-        var end = performance.now();
-        console.log("TIME : " + parseFloat(end-start) + " for " + pi.toFixed(20))*/
+        var t = 100;
+        var start_save;
+        var end_save;
+        for(var i = 0; i < 2; i++){
+          var start = performance.now();
+          var pi = simpson(f,0.0,1.0,190);
+          var end = performance.now();
+          if(parseFloat(parseFloat(end)-parseFloat(start)) < t){
+            start_save = start;
+            end_save = end;
+            t = parseFloat(parseFloat(end)-parseFloat(start));
+          }
+        }
+
+        console.log("TIME : " + t + " for " + pi.toFixed(20));
 
         //N = 194
-        var pi = 0;
+        /*var pi = 0;
         var n = 0;
         do{
             pi = simpson(f,0.0,1.0,n);
             console.log(pi.toFixed(20) + " with diff : " + Math.abs(REAL_PI - pi) + " N : " + n);
             n++;
-        }while( Math.abs(REAL_PI-pi) > 0.0);
+        }while( Math.abs(REAL_PI-pi) > 0.0 && n <= 10000);
+        */
     </script>
 </body>
 </html>
