@@ -3,16 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>Labo 5 - Equipe 1</title>
+    <style>
+    .red{color:red;}
+    .green{color:green;}
+    </style>
 </head>
 <body>
+    <form>
+      <label>
+        Nombre itérations
+        <input type="number" id="n_iter" value="198"/>
+      </label>
+      <br>
+      <label>
+        a
+        <input type="number" id="in_a" step="0.1" value="0.0"/>
+      </label>
+      <br>
+      <label>
+        b
+        <input type="number" id="in_b" step="0.1" value="1.0"/>
+      </label>
+      <br>
+      <button onclick="doSimpson();" type="button">Calculer</button>
+    </form>
+    <div id="result">
+      <table id="result-table">
+      </table>
+    </div>
     <script>
-        var REAL_PI = 3.14159265358979323;
+        var REAL_PI = "3.14159265358979323846";
         var f = function(x){
             return 4 / (1 + x*x);
         }
         function simpson(f,a,b,n){
             var sum = 0.0;
-            var h = parseFloat((b-a) / n);
+            var h = (b-a) / n;
 
             for(var i = 1 ; i < n ; i+=2){
                 if((i+1) < n) sum += 2 * f(a + (i+1) * h);
@@ -20,22 +46,61 @@
             }
             return (h/3) * (f(a) + sum + f(b));
         }
-
-        var t = 100;
-        var start_save;
-        var end_save;
-        for(var i = 0; i < 2; i++){
-          var start = performance.now();
-          var pi = simpson(f,0.0,1.0,190);
-          var end = performance.now();
-          if(parseFloat(parseFloat(end)-parseFloat(start)) < t){
-            start_save = start;
-            end_save = end;
-            t = parseFloat(parseFloat(end)-parseFloat(start));
-          }
+        /*function middleBars(f,a,b,h,n){
+            var sum = 0.0;
+            for(var i = 1; i < n; i++){
+              sum += h * f(0.5 *(2 * (a + i * h) - h));
+            }
+            return sum;
         }
 
-        console.log("TIME : " + t + " for " + pi.toFixed(20));
+        function doBars(){
+          var a = parseFloat(document.getElementById("in_a").value);
+          var b = parseFloat(document.getElementById("in_b").value);
+          var iter = parseInt(document.getElementById("n_iter").value);
+          var start = performance.now();
+          var pi = middleBars(f,a,b,(b-a) / iter,iter);
+          var end = performance.now();
+          display(a,b,pi,(end-start));
+          console.log("TIME : " + (end-start) + " for " + pi.toFixed(20));
+        }*/
+
+        function doSimpson(){
+          var a = parseFloat(document.getElementById("in_a").value);
+          var b = parseFloat(document.getElementById("in_b").value);
+          var iter = parseInt(document.getElementById("n_iter").value);
+          var start = performance.now();
+          var pi = simpson(f,a,b,iter);
+          var end = performance.now();
+          display(a,b,pi,(end-start));
+          console.log("TIME : " + (end-start) + " for " + pi.toFixed(20));
+        }
+
+        function display(a,b,pi,time){
+          var table = document.getElementById("result-table");
+          table.innerHTML = "";
+          var real_pi_row = table.insertRow(0);
+          var header = real_pi_row.insertCell(0);
+          header.innerHTML = "REAL PI";
+          var calc_pi_row = table.insertRow(1);
+          var sys_pi_row = table.insertRow(2);
+          calc_pi_row.insertCell(0).innerHTML = "Pi calculé";
+          sys_pi_row.insertCell(0).innerHTML = "Math.PI";
+          for(var i = 0; i < REAL_PI.length; i++){
+            real_pi_row.insertCell(i+1).innerHTML = REAL_PI[i];
+            var cls = "red";
+            if(pi.toFixed(20).toString()[i] == REAL_PI[i]) cls = "green";
+            calc_pi_row.insertCell(i+1).innerHTML = '<span class="' + cls + '">' +pi.toFixed(20).toString()[i] + "</span>";
+            cls = "red";
+            if(Math.PI.toFixed(20).toString()[i] == REAL_PI[i]) cls = "green";
+            sys_pi_row.insertCell(i+1).innerHTML = '<span class="' + cls + '">' +Math.PI.toFixed(20).toString()[i]+ "</span>";
+          }
+          var time_row = table.insertRow(3);
+          time_row.insertCell(0).innerHTML = "Temps [us] ";
+          var time_cell = time_row.insertCell(1);
+          time_cell.colSpan = 10;
+          time_cell.innerHTML = parseFloat(time * 1000).toFixed(10);
+        }
 
         //N = 194
         /*var pi = 0;
@@ -47,5 +112,7 @@
         }while( Math.abs(REAL_PI-pi) > 0.0 && n <= 10000);
         */
     </script>
+
+
 </body>
 </html>
