@@ -9,25 +9,17 @@
     </style>
 </head>
 <body>
-    <form>
+    <form id="form">
+      <h1>Approximation PI - Méthode Simpson</h1>
       <label>
-        Nombre itérations
-        <input type="number" id="n_iter" value="198"/>
+        Nombre itérations (198 est idéal)
+        <input type="number" min="1" max="10000" id="n_iter" value="198"/>
       </label>
       <br>
-      <label>
-        a
-        <input type="number" id="in_a" step="0.1" value="0.0"/>
-      </label>
-      <br>
-      <label>
-        b
-        <input type="number" id="in_b" step="0.1" value="1.0"/>
-      </label>
-      <br>
-      <button onclick="doSimpson();" type="button">Calculer</button>
+      <input type="submit" value="Calculer"/>
     </form>
     <div id="result">
+      <h1>Résultat</h1>
       <table id="result-table">
       </table>
     </div>
@@ -65,18 +57,21 @@
           console.log("TIME : " + (end-start) + " for " + pi.toFixed(20));
         }*/
 
-        function doSimpson(){
-          var a = parseFloat(document.getElementById("in_a").value);
-          var b = parseFloat(document.getElementById("in_b").value);
+        document.getElementById("form").onsubmit = function(event){
+          event.preventDefault();
+          doSimpson();
+        }
+
+        function doSimpson(){;
           var iter = parseInt(document.getElementById("n_iter").value);
           var start = performance.now();
-          var pi = simpson(f,a,b,iter);
+          var pi = simpson(f,.0,1.0,iter);
           var end = performance.now();
-          display(a,b,pi,(end-start));
+          display(pi,(end-start));
           console.log("TIME : " + (end-start) + " for " + pi.toFixed(20));
         }
 
-        function display(a,b,pi,time){
+        function display(pi,time){
           var table = document.getElementById("result-table");
           table.innerHTML = "";
           var real_pi_row = table.insertRow(0);
