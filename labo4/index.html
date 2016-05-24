@@ -2,10 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Labo 4</title>
+    <title>Labo 4 - Equipe 1</title>
   </head>
   <body>
 
+    <div>
     <div id="cosx" style="float:left;">
       <h1>Cos(x) approximé avec Taylor</h1>
       <canvas width="600px" height="480px" id="cosxCanvas"></canvas>
@@ -34,7 +35,7 @@
       </label>
       <label>
         h:
-        <input style="width:25px;" type="number" name="cosx-derivative-h" value="1" step="0.1" id="cosx-derivative-h"/>
+        <input style="width:35px;" type="number" name="cosx-derivative-h" value="1" step="0.1" id="cosx-derivative-h"/>
       </label>
       <button id="cosx-derivative-start">Start animation</button>
     </div>
@@ -52,11 +53,12 @@
       </label>
       <label>
         h:
-        <input style="width:25px;" type="number" name="cosx-double-derivative-h" value="1" step="0.1" id="cosx-double-derivative-h"/>
+        <input style="width:35px;" type="number" name="cosx-double-derivative-h" value="1" step="0.1" id="cosx-double-derivative-h"/>
       </label>
       <button id="cosx-double-derivative-start">Start animation</button>
     </div>
-    <script src="graph.js"></script>
+  </div>
+    <script src="AN_Labo4_Equipe1_graph.js"></script>
     <script>
     function central_derivative(f,x,h){
       return (f(x + h) - f(x-h))/(2*h);
@@ -115,22 +117,27 @@
       }
       return sum;
     }
-
+    function animate(i,anim_fun,max) {
+        if (i <= max) {
+            anim_fun.call(this,i);
+            setTimeout(animate.bind(this, ++i,anim_fun,max), 500);
+        } else {
+            this.removeAttribute("disabled");
+        }
+    }
 
     document.getElementById("cosx-start").onclick = function(event){
       cosxGraph.deleteGraph();
       var min = document.getElementById("cosx-n_min").value;
       var max = document.getElementById("cosx-n_max").value;
       this.disabled = "true";
-      for(var i = min,anim=0; i <= max ; i ++,anim++){
-        var input = this;
-        setTimeout(function(i_local,input){
-          cosxGraph.drawEquation(function(x) {
-            return f(x,i_local);
-          }, getRandomColor(), 3);
-          if(i_local >= max) input.removeAttribute("disabled");
-        },anim*500,i,input);
-      }
+      animate.call(this, min,function(i){
+        cosxGraph.drawEquation(
+          x => f(x, i),
+          getRandomColor(),
+          3
+        );
+      },max);
     };
     document.getElementById("cosx-derivative-start").onclick = function(event){
       cosxDerivativeGraph.deleteGraph();
@@ -138,15 +145,13 @@
       var max = document.getElementById("cosx-derivative-n_max").value;
       var h = document.getElementById("cosx-derivative-h").value;
       this.disabled = "true";
-      for(var i = min,anim=0; i <= max ; i ++,anim++){
-        var input = this;
-        setTimeout(function(i_local,h_local,input){
-          cosxDerivativeGraph.drawEquation(function(x) {
-            return richardson_derivative(f,i_local,x,h_local);
-          }, getRandomColor(), 3);
-          if(i_local >= max) input.removeAttribute("disabled");
-        },anim*500,i,parseFloat(h),input);
-      }
+      animate.call(this, min,function(i){
+        cosxDerivativeGraph.drawEquation(
+          x => richardson_derivative(f,i,x, parseFloat(h)),
+          getRandomColor(),
+          3
+        );
+      },max);
     };
     document.getElementById("cosx-double-derivative-start").onclick = function(event){
       cosxDoubleDerivativeGraph.deleteGraph();
@@ -157,16 +162,34 @@
       var inner_f = function(x,n){
         return richardson_derivative(f,n,x,1);
       }
-      for(var i = min,anim=0; i <= max ; i ++,anim++){
-        var input = this;
-        setTimeout(function(i_local,h_local,input){
-          cosxDoubleDerivativeGraph.drawEquation(function(x) {
-            return richardson_derivative(inner_f,i_local,x,h_local);
-          }, getRandomColor(), 3);
-          if(i_local >= max) input.removeAttribute("disabled");
-        },anim*500,i,parseFloat(h),input);
-      }
+      animate.call(this, min,function(i){
+        cosxDoubleDerivativeGraph.drawEquation(
+          x => richardson_derivative(inner_f,i,x, parseFloat(h)),
+          getRandomColor(),
+          3
+        );
+      },max);
     };
     </script>
+
+    <div id="doc">
+      <br>
+      <h1>Laboratoire 4 : Dérivation numérique</h1>
+<h2>Introduction</h2>
+<p>Ce laboratoire a été réalisé dans le cadre du cours d’algorithmes numériques. Ce projet porte sur la dérivation numérique. Il a été demandé de dériver deux fois la fonction cosinus(x) et ce sans utiliser de fonction trigonométrique dans notre programme. Il était possible d’utiliser différentes méthodes de dérivation. La méthode de Richardson a été retenue. Ce laboratoire a été réalisé en HTML5 et javascript.
+</p>
+<h2>Méthode de développement</h2>
+<p>Afin de pouvoir dessiner la fonction cosinus(x) sans utiliser de fonction trigonométrique, la série de Taylor est utilisée. Grâce à celle-ci, il est possible d’approximer le cosinus assez précisément suivant l’ordre jusqu’au quel la série est calculée.
+La méthode de Richardson permet de calculer la dérivée d’un fonction en un point. Pour ce faire, quatre points entourant notre point de référence sont utilisés. Grâce à ces derniers, un polynôme passant par ces quatre points peut être utilisé et ainsi approximer la dérivée recherchée. Cette méthode nous permet d’avoir un petit ordre d’erreur, donc une bonne approximation.
+</p>
+
+<h2>Démonstration série de Taylor du cos(x)</h2>
+<img src="AN_Labo4_Equipe1_taylor.jpg "/>
+<h2>Conclusion</h2>
+<p>Le programme fonctionne très bien. Il affiche correctement la fonction cosinus(x) Et ses deux premières dérivées. Il est même possible de choisir le coefficient h de la méthode de Richardson. Donc l’écart entre le point de référence et le point se trouvant le plus loin de celui-ci. De plus, il est possible de préciser l’ordre jusqu'au quel est calculé la série de Taylor ainsi que depuis lequel on souhaite voir un affichage. Il est évident que plus l’ordre est grand, meilleure sera l’approximation.
+Une des améliorations possibles du programme serait d’afficher plus de dérivée de cosinus(x). Il serait aussi intéressant d'implémenter les trois méthodes différentes vues en cours. Cela permettrait à l’utilisation de voir les éventuelles différences de précisions entre ces dernières.
+</p>
+
+    </div>
   </body>
 </html>
