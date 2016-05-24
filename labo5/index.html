@@ -23,6 +23,19 @@
       <table id="result-table">
       </table>
     </div>
+    <h1>Rapport</h1>
+    <h2>Introduction</h2>
+    <p>Ce laboratoire a été réalisé dans le cadre du cours d’algorithmes numériques. Ce projet porte sur l’intégration. Il a été demandé d’approximer pi grâce à une intégrale. La méthode de Simpson a été utilisée. Ce laboratoire a été réalisé en HTML5 et javascript.</p>
+    <h2>Méthode de développement</h2>
+    <p>La méthode de Simpson a été utilisée. C’est une méthode “avancée”. Elle utilise trois points se trouvant sur la fonction dont en souhaite calculer l’intégrale. Une parabole passant par ces trois points est ensuite utilisée pour approximer la fonction de base. Cette méthode permet d’avoir une erreur très faible.
+        Afin de pouvoir comparer la valeur trouvée, pi a été codé en dur avec vingt décimales. De plus, elle est aussi affichée en utilisant Math.PI, la constante de javascript. Chacune est affichée avec vingt décimales, cela va permettre à l’utilisateur de comparer la précision de chaque méthode.
+        Le temps d’exécution de la méthode de Simpson est affiché.
+    </p>
+    <h2>Conclusion</h2>
+    <p>Le programme fonctionne correctement. Pi est donné correctement jusqu’à la quatorzième décimale, à partir de la quinzième c’est une approximation de la valeur de pi. Il n’est pas possible d’être plus précis car il faudrait faire plus d’itération et cela est impossible car certaines valeurs deviennent trop petites. En effet, celles-ci deviennent plus petite que l’erreur machine. Il n’est donc plus possible de les manipuler.
+        En ce qui concerne une représentation graphique de pi, rien n’a été programmé, par manque d’imagination. Cependant, il est possible de trouver quelques représentations intéressantes en cherchant sur internet. Notamment celle disponible à cette adresses : <a href="http://gigapan.com/gigapans/106803" target="_blank">http://gigapan.com/gigapans/106803</a>. Il s’agit d’une représentation de pi avec cent milliards de décimales en base quatre.
+        Il est possible de noter aussi ce site :<a href="http://www.two-n.com/pi/" target="_blank">http://www.two-n.com/pi/</a>  qui permet de visualiser quatre millions de décimales. Il est aussi possible de voir si une suite de nombre quelconque est comprise dans ces décimales de pi. On peut par exemple chercher sa date de naissance et voir à quelle position elle se trouve, si elle s’y trouve.
+        Évidemment, pour quelque chose de plus simple, on peut noter que pi apparaît dans le calcul de la surface d’un cercle ainsi que dans le volume d’une sphère.</p>
     <script>
         var REAL_PI = "3.14159265358979323846";
         var f = function(x){
