@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Labo 6 - Equipe 1</title>
+</head>
+<body>
+<canvas style="margin: 10px;" width="600" height="600" id="canvas">
+
+</canvas>
+
+<script>
+    var arrows = Array();
+    var nArrowsHeight = 10;
+    var nArrowsWidth = 10;
+    for(var i=0;i<nArrowsHeight*nArrowsWidth;i++){
+        arrows.push({
+            rot:0,
+            strength:10
+        });
+    }
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+
+    setInterval(draw,500);
+
+    function draw(){
+        var i =0;
+        var y=0;
+        var margin=50;
+        context.clearRect(0,0,600,600);
+        arrows.forEach(function(arrow) {
+            context.beginPath();
+            context.moveTo(i*margin, y*margin);
+            context.lineTo(i*margin, (y*margin)+arrow.strength);
+            context.stroke();
+            context.closePath();
+            if(i>=nArrowsWidth-1){
+                i=0;
+                y++;
+            }
+            else{
+                i++;
+            }
+        });
+    }
+    function update(){
+        //Mettre à jour les flèches
+    }
+</script></body>
