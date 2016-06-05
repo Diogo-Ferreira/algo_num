@@ -8,8 +8,59 @@
 <canvas style="margin: 10px;" width="600" height="600" id="canvas">
 
 </canvas>
+<h1>Rapport</h1>
+<h2>Introduction</h2>
+<p>Ce la boratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Ce projet porte
+sur les équations différentielles. Il a été demandé de pouvoir dessiner un champ véctoriel suivant
+une équation différentielle. Ce laboratoire a été réalisé en HTML5 et en JavaScript.</p>
+<h2>Méthode de développement</h2>
+<p></p>
+<h2>Conclusion</h2>
+<p></p>
 
 <script>
+    //Equation différentielle
+    function f(t,y){
+        return -4.0*t + 2.0*y;// trouvé sur: https://fr.wikiversity.org/wiki/%C3%89quation_diff%C3%A9rentielle/Exercices/%C3%89quation_diff%C3%A9rentielle_lin%C3%A9aire_du_premier_ordre
+    }
+    //Méthode de Runge-Kutta : avec 4 itérations afin de trouver une solution.
+    function runge_kutta(y,t,dt,f){ // from : https://rosettacode.org/wiki/Runge-Kutta_method#JavaScript
+        //y et t sont les variables que prend la fonction f
+        //f équation différentielle sous la forme y' = f(t,y)
+        //dt = pas de temps
+        var k1 = dt*f(t,y);
+        var k2 =  dt*f(t+dt/2.0,y+k1/2.0);
+        var k3 = dt*f(t+dt/2.0,y+k2/2.0);
+        var k4 = dt*f(t+dt,y+k3);
+        //retourne y = f(y,t)
+        return y +(dt/6)*(k1+2.0*k2+2.0*k3+k4);//Correction ici par rapport au site. Multiplication par dt.
+    }
+    //Tests
+   /* function actual(t){
+        return (1/16)*(t*t+4)*(t*t+4);
+    }
+    var y = 1.0;
+    var t =0.0;
+    var step = 0.1;
+    var steps = 0;
+    var maxS = 101;
+    var sample = 10;
+
+    while(steps <maxS){
+        if(steps%sample === 0){
+            console.log("y("+t+") = "+y+"+ "+(actual(t)-y).toExponential());
+        }
+        y = runge_kutta(y,t,step,f);
+        t = ((t*10)+(step*10))/10;
+        steps += 1;
+    }*/
+    function loop(){
+        //Ici dessiner les flèches après avoir calculer y avec runge_kutta.
+        //Calculer la direction ou rotation des flèches selon runge_kuta
+       //Quelque chose de ce genre : arrows.rot = runge_kutta(arrows.strength,t,0.1,f);
+        update();
+    }
+
     var arrows = Array();
     var nArrowsHeight = 10;
     var nArrowsWidth = 10;
