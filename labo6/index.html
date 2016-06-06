@@ -60,13 +60,16 @@ une équation différentielle. Ce laboratoire a été réalisé en HTML5 et en J
        //Quelque chose de ce genre : arrows.rot = runge_kutta(arrows.strength,t,0.1,f);
         update();
     }
+    function getRandomArbitrary(min, max) {
+      return Math.random() * (max - min) + min;
+    }
 
     var arrows = Array();
     var nArrowsHeight = 10;
     var nArrowsWidth = 10;
     for(var i=0;i<nArrowsHeight*nArrowsWidth;i++){
         arrows.push({
-            rot:0,
+            rot:-3.0/4.0*Math.PI,
             strength:10
         });
     }
@@ -81,11 +84,20 @@ une équation différentielle. Ce laboratoire a été réalisé en HTML5 et en J
         var margin=50;
         context.clearRect(0,0,600,600);
         arrows.forEach(function(arrow) {
+            context.save();
+            context.translate(i*margin,  y*margin);
+            context.rotate(arrow.rot);
+            context.translate(-i*margin , -y*margin);
             context.beginPath();
             context.moveTo(i*margin, y*margin);
             context.lineTo(i*margin, (y*margin)+arrow.strength);
+            context.moveTo(i*margin, (y*margin)+arrow.strength);
+            context.lineTo(i*margin+5,(y*margin)+arrow.strength-5);
+            context.moveTo(i*margin, (y*margin)+arrow.strength);
+            context.lineTo(i*margin-5,(y*margin)+arrow.strength-5);
             context.stroke();
             context.closePath();
+            context.restore();
             if(i>=nArrowsWidth-1){
                 i=0;
                 y++;
