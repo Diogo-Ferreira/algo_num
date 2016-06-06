@@ -5,7 +5,7 @@
     <title>Labo 6 - Equipe 1</title>
 </head>
 <body>
-<canvas style="margin: 10px;" width="600" height="600" id="canvas">
+<canvas style="margin: 10px;" width="800" height="600" id="canvas">
 
 </canvas>
 <h1>Rapport</h1>
@@ -70,7 +70,7 @@ une équation différentielle. Ce laboratoire a été réalisé en HTML5 et en J
     for(var i=0;i<nArrowsHeight*nArrowsWidth;i++){
         arrows.push({
             rot:0,
-            strength:10
+            strength:30
         });
     }
     var canvas = document.getElementById("canvas");
@@ -80,9 +80,13 @@ une équation différentielle. Ce laboratoire a été réalisé en HTML5 et en J
       var i =1;
       var y=1;
       var margin=50;
+      var prevY=0.0;
+      var currentY=1.0;
+      var step = 0.1;
       context.clearRect(0,0,600,600);
       arrows.forEach(function(arrow) {
-        update(arrow,i,y,margin);
+        step = ((i+1)*margin / 800.0 * 4.0) - (i*margin / 800.0 * 4.0);
+        update(arrow,i,y,margin,prevY,currentY,step);
         draw(arrow,i,y,margin);
         if(i>=nArrowsWidth){
             i=1;
@@ -97,21 +101,43 @@ une équation différentielle. Ce laboratoire a été réalisé en HTML5 et en J
     function draw(arrow,i,y,margin){
         context.save();
         context.translate(i*margin,  y*margin);
-        context.rotate(arrow.rot);
+        context.rotate(Math.PI*0.5 + arrow.rot);
         context.translate(-i*margin , -y*margin-arrow.strength*0.5);
         context.beginPath();
         context.moveTo(i*margin, y*margin);
         context.lineTo(i*margin, (y*margin)+arrow.strength);
-        context.moveTo(i*margin, (y*margin)+arrow.strength);
+        /*context.moveTo(i*margin, (y*margin)+arrow.strength);
         context.lineTo(i*margin+5,(y*margin)+arrow.strength-5);
         context.moveTo(i*margin, (y*margin)+arrow.strength);
-        context.lineTo(i*margin-5,(y*margin)+arrow.strength-5);
+        context.lineTo(i*margin-5,(y*margin)+arrow.strength-5);*/
         context.stroke();
         context.closePath();
         context.restore();
     }
-    function update(arrow,i,y,margin){
-        //Mettre à jour les flèches
-        arrow.rot += 0.1;
+    function f(t,y){
+        //return t+ y;
+        return -4.0*t + 2.0*y;// trouvé sur: https://fr.wikiversity.org/wiki/%C3%89quation_diff%C3%A9rentielle/Exercices/%C3%89quation_diff%C3%A9rentielle_lin%C3%A9aire_du_premier_ordre
     }
+    function update(arrow,i,y,margin,prevY,currentY,step){
+        prevY = currentY;
+        var t1 = i*margin / 800.0 * 4.0;
+        var y1 = prevY;
+        var t2 = t1 + 0.1;
+        currentY = euler(f,t1,y1,t2,0.1);
+        console.log(currentY);
+        /*currentY = euler(f,t1,y1,t2,0.1);
+        console.log(i*margin / 800.0 * 4.0);*/
+        var d = (currentY - prevY) / t2 - t1;
+        arrow.rot = d;
+
+    }
+    function euler(f,t1,y1,t2,h){
+        var t =t1,y=y1;
+        while((t<t2 && t1<t2)||(t>t2 && t1>t2)){
+            y += h*f(t,y);
+            t+=h;
+        }
+        return y;
+    }
+
 </script></body>
