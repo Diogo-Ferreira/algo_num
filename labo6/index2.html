@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Labo 6 - Equipe 1</title>
+</head>
+<body>
+<canvas style="margin: 10px;" width="800" height="600" id="canvas">
+
+</canvas>
+<h1>Rapport</h1>
+<h2>Introduction</h2>
+<p>Ce la boratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Ce projet porte
+sur les équations différentielles. Il a été demandé de pouvoir simuler un double pendule. Ce laboratoire a été réalisé en HTML5 et en JavaScript.</p>
+<h2>Méthode de développement</h2>
+<p></p>
+<h2>Conclusion</h2>
+<p></p>
+
+<script>
+    var canvas = document.getElementById("canvas");
+    var context = canvas.getContext("2d");
+	
+	//Physics Constants
+	var d2Phi1=0;//Angle du 1er pendule de la 2eme derivé par rapport au temps
+	var d2Phi2=0;//Angle du 2ème pendule de la 2eme derivé par rapport au temps
+	var dPhi1=0;//Angle du 1er pendule de la 1er derivé par rapport au temps
+	var dPhi2=0;//Angle du 2ème pendule de la 1er derivé par rapport au temps
+	var Phi1=50/180*(Math.PI);//Angle du 1er pendule par rapport à l'axe x,-y
+	var Phi2=65/180*(Math.PI);//Angle du 2ème pendule par rapport à l'axe x,-y
+	var m1=10;//Masse du pendule 1
+	var m2=10;//Masse du pendule 2
+	var l1=150;//longueur pendule 1
+	var l2=150;//longueur pendule 2
+	var X0=350; //position x double pendule
+	var Y0=60;//position y double pendule
+	var g=9.81;//gravité
+	var time=0.05;//temps de départ
+	
+	var myLine1 = {x0: X0, y0: Y0, x: 0, y: 0};
+	var myLine2 = {x0: 0, y0: 0, x: 0, y: 0};
+	var myCircle1 = {x: X0+l1*Math.sin(Phi1), y: Y0+l1*Math.cos(Phi1), mass: m1};
+	var myCircle2 = {x: X0+l1*Math.sin(Phi1)+l2*Math.sin(Phi2), y: Y0+l1*Math.cos(Phi1)+l2*Math.cos(Phi2), mass: m2};
+	
+	function drawCircle(myCircle, context) {
+		context.beginPath();
+		context.arc(myCircle.x, myCircle.y, myCircle.mass, 0, 2 * Math.PI, false);
+		context.fillStyle = '#000';
+		context.fill();
+		context.lineWidth = 5;
+		context.strokeStyle = 'black';
+		context.stroke();
+	}
+
+	function drawLine(myLine, context) {
+		context.beginPath();
+		context.moveTo(myLine.x0, myLine.y0);
+		context.lineTo(myLine.x, myLine.y);
+		context.strokeStyle = 'red';
+		context.stroke();
+	}
+	
+	
+    setInterval(function(){
+		mu      =  1+m1/m2;
+		//Lagrangien
+		d2Phi1  =  (g*(Math.sin(Phi2)*Math.cos(Phi1-Phi2)-mu*Math.sin(Phi1))-(l2*dPhi2*dPhi2+l1*dPhi1*dPhi1*Math.cos(Phi1-Phi2))*Math.sin(Phi1-Phi2))/(l1*(mu-Math.cos(Phi1-Phi2)*Math.cos(Phi1-Phi2)));
+		d2Phi2  =  (mu*g*(Math.sin(Phi1)*Math.cos(Phi1-Phi2)-Math.sin(Phi2))+(mu*l1*dPhi1*dPhi1+l2*dPhi2*dPhi2*Math.cos(Phi1-Phi2))*Math.sin(Phi1-Phi2))/(l2*(mu-Math.cos(Phi1-Phi2)*Math.cos(Phi1-Phi2)));
+		dPhi1   += d2Phi1*time;
+		dPhi2   += d2Phi2*time;
+		Phi1    += dPhi1*time;
+		Phi2    += dPhi2*time;
+
+		myCircle1.x = X0+l1*Math.sin(Phi1);
+		myCircle1.y = Y0+l1*Math.cos(Phi1);
+		myCircle2.x = X0+l1*Math.sin(Phi1)+l2*Math.sin(Phi2);
+		myCircle2.y = Y0+l1*Math.cos(Phi1)+l2*Math.cos(Phi2);
+
+		myLine1.x  = myCircle1.x;
+		myLine1.y  = myCircle1.y;
+		myLine2.x0 = myCircle1.x;
+		myLine2.y0 = myCircle1.y;
+		myLine2.x  = myCircle2.x;
+		myLine2.y  = myCircle2.y;
+
+		context.clearRect(0, 0, canvas.width, canvas.height);
+
+		drawLine(myLine1, context);
+		drawLine(myLine2, context);
+		drawCircle(myCircle1, context);
+		drawCircle(myCircle2, context);
+	}, 0);
+
+
+</script></body>
