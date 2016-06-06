@@ -69,45 +69,49 @@ une équation différentielle. Ce laboratoire a été réalisé en HTML5 et en J
     var nArrowsWidth = 10;
     for(var i=0;i<nArrowsHeight*nArrowsWidth;i++){
         arrows.push({
-            rot:-3.0/4.0*Math.PI,
+            rot:0,
             strength:10
         });
     }
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
 
-    setInterval(draw,500);
+    setInterval(function(){
+      var i =1;
+      var y=1;
+      var margin=50;
+      context.clearRect(0,0,600,600);
+      arrows.forEach(function(arrow) {
+        update(arrow,i,y,margin);
+        draw(arrow,i,y,margin);
+        if(i>=nArrowsWidth){
+            i=1;
+            y++;
+        }
+        else{
+            i++;
+        }
+      });
+    },50);
 
-    function draw(){
-        var i =0;
-        var y=0;
-        var margin=50;
-        context.clearRect(0,0,600,600);
-        arrows.forEach(function(arrow) {
-            context.save();
-            context.translate(i*margin,  y*margin);
-            context.rotate(arrow.rot);
-            context.translate(-i*margin , -y*margin);
-            context.beginPath();
-            context.moveTo(i*margin, y*margin);
-            context.lineTo(i*margin, (y*margin)+arrow.strength);
-            context.moveTo(i*margin, (y*margin)+arrow.strength);
-            context.lineTo(i*margin+5,(y*margin)+arrow.strength-5);
-            context.moveTo(i*margin, (y*margin)+arrow.strength);
-            context.lineTo(i*margin-5,(y*margin)+arrow.strength-5);
-            context.stroke();
-            context.closePath();
-            context.restore();
-            if(i>=nArrowsWidth-1){
-                i=0;
-                y++;
-            }
-            else{
-                i++;
-            }
-        });
+    function draw(arrow,i,y,margin){
+        context.save();
+        context.translate(i*margin,  y*margin);
+        context.rotate(arrow.rot);
+        context.translate(-i*margin , -y*margin-arrow.strength*0.5);
+        context.beginPath();
+        context.moveTo(i*margin, y*margin);
+        context.lineTo(i*margin, (y*margin)+arrow.strength);
+        context.moveTo(i*margin, (y*margin)+arrow.strength);
+        context.lineTo(i*margin+5,(y*margin)+arrow.strength-5);
+        context.moveTo(i*margin, (y*margin)+arrow.strength);
+        context.lineTo(i*margin-5,(y*margin)+arrow.strength-5);
+        context.stroke();
+        context.closePath();
+        context.restore();
     }
-    function update(){
+    function update(arrow,i,y,margin){
         //Mettre à jour les flèches
+        arrow.rot += 0.1;
     }
 </script></body>
