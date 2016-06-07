@@ -5,28 +5,29 @@
     <title>Labo 6 - Equipe 1</title>
 </head>
 <body>
-<h1>Double Pendule</h1>
 <canvas style="margin: 10px;" width="800" height="600" id="canvas">
 
 </canvas>
 <h1>Rapport</h1>
 <h2>Introduction</h2>
-<p>Ce laboratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Ce projet porte
+<p>Ce la boratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Ce projet porte
 sur les équations différentielles. Il a été demandé de pouvoir simuler un double pendule. Ce laboratoire a été réalisé en HTML5 et en JavaScript.</p>
 <h2>Méthode de développement</h2>
 <p>La méthode d'Euler a été utilisée. Elle permet d'approximer la fonction du mouvement du double pendule.
 Pour cela, il faut multiplier la fonction par un pas de temps, et ce sur tout l'intervalle de la fonction.
-Cette méthode est assez simple à implémenter, mais elle donne une erreur en O(h), avec h le pas de temps.</p>
+Cette méthode est assez simple à implémenter, mais elle donne une erreur en O(h), avec h le pas de temps. Pour calculer à chaque fois les angles au temps t, on a pris une équation de Lagrange résolu sur mathematica <a href="https://fr.wikipedia.org/wiki/%C3%89quations_de_Lagrange">https://fr.wikipedia.org/wiki/%C3%89quations_de_Lagrange</a></p>
+<img src="AN_Labo6_Equipe1_equations.png "/>
 <h2>Conclusion</h2>
 <p>Le programme fonctionne bien. On peut voir le pendule osciller. Si on laisse le programme tourner assez longtemps,
-on voit le régime chaotique apparaître. Il est difficile de touver un comparaison pour voir si le pendule fait des erreurs.
+on voit le régime chaotique apparaître. Il est difficile de touver une comparaison pour voir si le pendule fait des erreurs.
 Il doit cependant y en avoir car la méthode d'Euler n'est pas optimale. Pour avoir une meilleur approximation, la méthode de
 Runge-Kutta pourrait être implémentée. Cela n'a pas été fait par manque de temps.</p>
+
 
 <script>
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
-	
+
 	var d2thetaP1=0;//Angle du 1er pendule de la 2eme derivé par rapport au temps
 	var d2thetaP2=0;//Angle du 2ème pendule de la 2eme derivé par rapport au temps
 	var dthetaP1=0;//Angle du 1er pendule de la 1er derivé par rapport au temps
@@ -41,12 +42,12 @@ Runge-Kutta pourrait être implémentée. Cela n'a pas été fait par manque de 
 	var y0=0;//position y double pendule
 	var g=9.81;//gravité
 	var time=0.05;//temps de départ
-	
+
 	var lineP1 = {x0: x0, y0: y0, x: 0, y: 0};
 	var lineP2 = {x0: 0, y0: 0, x: 0, y: 0};
 	var circleP1 = {x: x0+lP1*Math.sin(thetaP1), y: y0+lP1*Math.cos(thetaP1), mass: massP1};
 	var circleP2 = {x: x0+lP1*Math.sin(thetaP1)+lP2*Math.sin(thetaP2), y: y0+lP1*Math.cos(thetaP1)+lP2*Math.cos(thetaP2), mass: massP2};
-	
+
 	function drawCircle(circle, context) {
 		context.beginPath();
 		//arc(x, y, r, angle, angle);
@@ -65,7 +66,7 @@ Runge-Kutta pourrait être implémentée. Cela n'a pas été fait par manque de 
 		context.strokeStyle = 'blue';
 		context.stroke();
 	}
-	
+
 	//Methode d'Euler
     setInterval(function(){
 
