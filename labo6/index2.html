@@ -13,9 +13,14 @@
 <p>Ce la boratoire a été réalisé dans le cadre du cours d'algorithmes numériques. Ce projet porte
 sur les équations différentielles. Il a été demandé de pouvoir simuler un double pendule. Ce laboratoire a été réalisé en HTML5 et en JavaScript.</p>
 <h2>Méthode de développement</h2>
-<p></p>
+<p>La méthode d'Euler a été utilisée. Elle permet d'approximer la fonction du mouvement du double pendule.
+Pour cela, il faut multiplier la fonction par un pas de temps, et ce sur tout l'intervalle de la fonction.
+Cette méthode est assez simple à implémenter, mais elle donne une erreur en O(h), avec h le pas de temps.</p>
 <h2>Conclusion</h2>
-<p></p>
+<p>Le programme fonctionne bien. On peut voir le pendule osciller. Si on laisse le programme tourner assez longtemps,
+on voit le régime chaotique apparaître. Il est difficile de touver un comparaison pour voir si le pendule fait des erreurs.
+Il doit cependant y en avoir car la méthode d'Euler n'est pas optimale. Pour avoir une meilleur approximation, la méthode de
+Runge-Kutta pourrait être implémentée. Cela n'a pas été fait par manque de temps.</p>
 
 <script>
     var canvas = document.getElementById("canvas");
@@ -63,7 +68,7 @@ sur les équations différentielles. Il a été demandé de pouvoir simuler un d
 	
     setInterval(function(){
 		mu      =  1+m1/m2;
-		//Lagrangien
+		//Lagrangien = eCin - ePot
 		d2Phi1  =  (g*(Math.sin(Phi2)*Math.cos(Phi1-Phi2)-mu*Math.sin(Phi1))-(l2*dPhi2*dPhi2+l1*dPhi1*dPhi1*Math.cos(Phi1-Phi2))*Math.sin(Phi1-Phi2))/(l1*(mu-Math.cos(Phi1-Phi2)*Math.cos(Phi1-Phi2)));
 		d2Phi2  =  (mu*g*(Math.sin(Phi1)*Math.cos(Phi1-Phi2)-Math.sin(Phi2))+(mu*l1*dPhi1*dPhi1+l2*dPhi2*dPhi2*Math.cos(Phi1-Phi2))*Math.sin(Phi1-Phi2))/(l2*(mu-Math.cos(Phi1-Phi2)*Math.cos(Phi1-Phi2)));
 		dPhi1   += d2Phi1*time;
