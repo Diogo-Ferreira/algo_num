@@ -21,74 +21,76 @@ sur les équations différentielles. Il a été demandé de pouvoir simuler un d
     var canvas = document.getElementById("canvas");
     var context = canvas.getContext("2d");
 	
-	//Physics Constants
-	var d2Phi1=0;//Angle du 1er pendule de la 2eme derivé par rapport au temps
-	var d2Phi2=0;//Angle du 2ème pendule de la 2eme derivé par rapport au temps
-	var dPhi1=0;//Angle du 1er pendule de la 1er derivé par rapport au temps
-	var dPhi2=0;//Angle du 2ème pendule de la 1er derivé par rapport au temps
-	var Phi1=50/180*(Math.PI);//Angle du 1er pendule par rapport à l'axe x,-y
-	var Phi2=65/180*(Math.PI);//Angle du 2ème pendule par rapport à l'axe x,-y
-	var m1=10;//Masse du pendule 1
-	var m2=10;//Masse du pendule 2
-	var l1=150;//longueur pendule 1
-	var l2=150;//longueur pendule 2
-	var X0=350; //position x double pendule
-	var Y0=60;//position y double pendule
+	var d2ThetaP1=0;//Angle du 1er pendule de la 2eme derivé par rapport au temps
+	var d2ThetaP2=0;//Angle du 2ème pendule de la 2eme derivé par rapport au temps
+	var dThetaP1=0;//Angle du 1er pendule de la 1er derivé par rapport au temps
+	var dThetaP2=0;//Angle du 2ème pendule de la 1er derivé par rapport au temps
+	var ThetaP1=50/180*(Math.PI);//Angle du 1er pendule par rapport à l'axe x,-y
+	var ThetaP2=65/180*(Math.PI);//Angle du 2ème pendule par rapport à l'axe x,-y
+	var mP1=15;//Masse du pendule 1 qui sera le rayon du cercle
+	var mP2=15;//Masse du pendule 2 qui sera le rayon du cercle
+	var lP1=100;//longueur pendule 1
+	var lP2=100;//longueur pendule 2
+	var x0=canvas.width/2; //position x du double pendule (milieu du canvas)
+	var y0=0;//position y double pendule
 	var g=9.81;//gravité
 	var time=0.05;//temps de départ
 	
-	var myLine1 = {x0: X0, y0: Y0, x: 0, y: 0};
-	var myLine2 = {x0: 0, y0: 0, x: 0, y: 0};
-	var myCircle1 = {x: X0+l1*Math.sin(Phi1), y: Y0+l1*Math.cos(Phi1), mass: m1};
-	var myCircle2 = {x: X0+l1*Math.sin(Phi1)+l2*Math.sin(Phi2), y: Y0+l1*Math.cos(Phi1)+l2*Math.cos(Phi2), mass: m2};
+	var lineP1 = {x0: x0, y0: y0, x: 0, y: 0};
+	var lineP2 = {x0: 0, y0: 0, x: 0, y: 0};
+	var circleP1 = {x: x0+lP1*Math.sin(ThetaP1), y: y0+lP1*Math.cos(ThetaP1), m: mP1};
+	var circleP2 = {x: x0+lP1*Math.sin(ThetaP1)+lP2*Math.sin(ThetaP2), y: y0+lP1*Math.cos(ThetaP1)+lP2*Math.cos(ThetaP2), m: mP2};
 	
-	function drawCircle(myCircle, context) {
+	function drawCircle(circle, context) {
 		context.beginPath();
-		context.arc(myCircle.x, myCircle.y, myCircle.mass, 0, 2 * Math.PI, false);
-		context.fillStyle = '#000';
+		//arc(x, y, r, angle, angle);
+		context.arc(circle.x, circle.y, circle.m, 0, 2 * Math.PI);
+		context.fillStyle='#000';
 		context.fill();
-		context.lineWidth = 5;
+		context.lineWidth = 3;
 		context.strokeStyle = 'black';
 		context.stroke();
 	}
 
-	function drawLine(myLine, context) {
+	function drawLine(line, context) {
 		context.beginPath();
-		context.moveTo(myLine.x0, myLine.y0);
-		context.lineTo(myLine.x, myLine.y);
-		context.strokeStyle = 'red';
+		context.moveTo(line.x0, line.y0);
+		context.lineTo(line.x, line.y);
+		context.strokeStyle = 'blue';
 		context.stroke();
 	}
 	
-	
+	//Methode d'Euler
     setInterval(function(){
-		mu      =  1+m1/m2;
-		//Lagrangien
-		d2Phi1  =  (g*(Math.sin(Phi2)*Math.cos(Phi1-Phi2)-mu*Math.sin(Phi1))-(l2*dPhi2*dPhi2+l1*dPhi1*dPhi1*Math.cos(Phi1-Phi2))*Math.sin(Phi1-Phi2))/(l1*(mu-Math.cos(Phi1-Phi2)*Math.cos(Phi1-Phi2)));
-		d2Phi2  =  (mu*g*(Math.sin(Phi1)*Math.cos(Phi1-Phi2)-Math.sin(Phi2))+(mu*l1*dPhi1*dPhi1+l2*dPhi2*dPhi2*Math.cos(Phi1-Phi2))*Math.sin(Phi1-Phi2))/(l2*(mu-Math.cos(Phi1-Phi2)*Math.cos(Phi1-Phi2)));
-		dPhi1   += d2Phi1*time;
-		dPhi2   += d2Phi2*time;
-		Phi1    += dPhi1*time;
-		Phi2    += dPhi2*time;
+		mu=1+mP1/mP2;
+		//On obtient ces angles en derivant le Lagrangian - calculs des nouveaux angles du pendule
+		d2ThetaP1=(g*(Math.sin(ThetaP2)*Math.cos(ThetaP1-ThetaP2)-mu*Math.sin(ThetaP1))-(lP2*dThetaP2*dThetaP2+lP1*dThetaP1*dThetaP1*Math.cos(ThetaP1-ThetaP2))*Math.sin(ThetaP1-ThetaP2))/(lP1*(mu-Math.cos(ThetaP1-ThetaP2)*Math.cos(ThetaP1-ThetaP2)));
+		d2ThetaP2=(mu*g*(Math.sin(ThetaP1)*Math.cos(ThetaP1-ThetaP2)-Math.sin(ThetaP2))+(mu*lP1*dThetaP1*dThetaP1+lP2*dThetaP2*dThetaP2*Math.cos(ThetaP1-ThetaP2))*Math.sin(ThetaP1-ThetaP2))/(lP2*(mu-Math.cos(ThetaP1-ThetaP2)*Math.cos(ThetaP1-ThetaP2)));
+		//Euler
+		dThetaP1+=d2ThetaP1*time;
+		dThetaP2+=d2ThetaP2*time;
+		ThetaP1+=dThetaP1*time;
+		ThetaP2+=dThetaP2*time;
 
-		myCircle1.x = X0+l1*Math.sin(Phi1);
-		myCircle1.y = Y0+l1*Math.cos(Phi1);
-		myCircle2.x = X0+l1*Math.sin(Phi1)+l2*Math.sin(Phi2);
-		myCircle2.y = Y0+l1*Math.cos(Phi1)+l2*Math.cos(Phi2);
+		//On redefinit les positions par rapport aux nouvelles angles calculés à l'instant t
+		circleP1.x=x0+lP1*Math.sin(ThetaP1);
+		circleP1.y=y0+lP1*Math.cos(ThetaP1);
+		circleP2.x=x0+lP1*Math.sin(ThetaP1)+lP2*Math.sin(ThetaP2);
+		circleP2.y=y0+lP1*Math.cos(ThetaP1)+lP2*Math.cos(ThetaP2);
 
-		myLine1.x  = myCircle1.x;
-		myLine1.y  = myCircle1.y;
-		myLine2.x0 = myCircle1.x;
-		myLine2.y0 = myCircle1.y;
-		myLine2.x  = myCircle2.x;
-		myLine2.y  = myCircle2.y;
+		lineP1.x=circleP1.x;
+		lineP1.y=circleP1.y;
+		lineP2.x0=circleP1.x;
+		lineP2.y0=circleP1.y;
+		lineP2.x=circleP2.x;
+		lineP2.y=circleP2.y;
 
 		context.clearRect(0, 0, canvas.width, canvas.height);
 
-		drawLine(myLine1, context);
-		drawLine(myLine2, context);
-		drawCircle(myCircle1, context);
-		drawCircle(myCircle2, context);
+		drawLine(lineP1, context);
+		drawLine(lineP2, context);
+		drawCircle(circleP1, context);
+		drawCircle(circleP2, context);
 	}, 0);
 
 
